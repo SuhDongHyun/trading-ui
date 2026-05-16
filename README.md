@@ -8,7 +8,7 @@ React, TypeScript, Vite 기반의 주식 차트 조회 UI입니다. 로컬 FastA
 - 종목 코드, 시작일, 종료일, 주기(`D`, `W`, `M`, `Y`), 수정주가 여부 입력
 - 현재가, 등락률, 거래량, PER/PBR/EPS/BPS 등 quote 정보 표시
 - SVG 기반 캔들 차트와 이동평균선 렌더링
-- RSI/Signal, MACD 보조지표 렌더링
+- RSI/Signal, MACD/Signal 보조지표 렌더링
 - 지표 설정 모달에서 이동평균 window, RSI window, Signal EMA, MACD EMA 값 변경
 - API 오류와 빈 데이터 상태를 화면 안에서 표시
 
@@ -41,6 +41,7 @@ npm install
 - `POST /stock_quote/indicator/rsi`
 - `POST /stock_quote/indicator/rsi-signal`
 - `POST /stock_quote/indicator/macd`
+- `POST /stock_quote/indicator/macd-signal`
 
 ### 3. 개발 서버 실행
 
@@ -131,6 +132,7 @@ React 컴포넌트는 `fetch`를 직접 호출하지 않습니다. 화면은 `us
 - RSI: `rsi_window`
 - RSI Signal: `rsi_window`, `ema_window`
 - MACD: `ema_short_window`, `ema_long_window`
+- MACD Signal: `ema_short_window`, `ema_long_window`, `ema_window`
 
 ## 기본값
 

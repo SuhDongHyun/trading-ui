@@ -59,8 +59,10 @@ export function ChartShell({ data, isLoading, settings, period, onOpenSettings }
           />
           <IndicatorPanel
             title={`MACD(${settings.macdShortWindow},${settings.macdLongWindow})`}
+            secondaryTitle={`Signal(${settings.rsiSignalEmaWindow})`}
             mode="macd"
             macd={data.macd}
+            macdSignal={data.macdSignal}
             showDateAxis
             onOpenSettings={onOpenSettings}
           />

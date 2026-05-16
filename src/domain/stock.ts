@@ -79,6 +79,12 @@ export type MacdPoint = {
   macd: number;
 };
 
+export type MacdSignalPoint = {
+  date: string;
+  macdEma: number;
+  signal: 'buy' | 'sell' | 'neutral' | string;
+};
+
 export type StockChartData = {
   quote: StockQuote;
   prices: DailyPrice[];
@@ -86,6 +92,7 @@ export type StockChartData = {
   rsi: RsiPoint[];
   rsiSignal: RsiSignalPoint[];
   macd: MacdPoint[];
+  macdSignal: MacdSignalPoint[];
 };
 
 export type StockRepository = {
@@ -99,6 +106,12 @@ export type StockRepository = {
     emaWindow: number,
   ): Promise<RsiSignalPoint[]>;
   getMacd(query: StockQuery, shortWindow: number, longWindow: number): Promise<MacdPoint[]>;
+  getMacdSignal(
+    query: StockQuery,
+    shortWindow: number,
+    longWindow: number,
+    emaWindow: number,
+  ): Promise<MacdSignalPoint[]>;
 };
 
 export type PriceExtreme = {
@@ -258,6 +271,17 @@ export function createPaddedValueAxis(values: number[], options: PaddedValueAxis
 
 export function createRsiReferenceLines(min: number, max: number): number[] {
   return [30, 70].filter((value) => value >= min && value <= max);
+}
+
+export function createMacdValueAxis(values: number[]): PaddedValueAxis {
+  const absoluteMax = Math.max(1, ...values.map((value) => Math.abs(value)));
+  return createPaddedValueAxis(values, {
+    count: 5,
+    paddingRatio: 0.12,
+    includeZero: true,
+    symmetricAroundZero: false,
+    roundTo: createMagnitudeAxisStep(absoluteMax),
+  });
 }
 
 export function createMagnitudeAxisStep(maxAbsoluteValue: number): number {

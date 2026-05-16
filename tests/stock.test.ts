@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import {
   createPaddedValueAxis,
+  createMacdValueAxis,
   createDateAxisTicks,
   createDefaultQuery,
   createMagnitudeAxisStep,
@@ -75,16 +76,13 @@ test('createPaddedValueAxis rounds price ticks to thousands when requested', () 
   assert.deepEqual(axis.ticks, [203000, 200000, 198000, 195000, 192000]);
 });
 
-test('createPaddedValueAxis can keep MACD centered around zero with clean ticks', () => {
-  const axis = createPaddedValueAxis([-23.4, 16.8], {
-    count: 5,
-    paddingRatio: 0.12,
-    includeZero: true,
-    symmetricAroundZero: true,
-    roundTo: 10,
-  });
+test('createMacdValueAxis keeps zero visible without forcing a symmetric domain', () => {
+  const axis = createMacdValueAxis([-0.2, 2]);
 
-  assert.deepEqual(axis.ticks, [20, 0, -20]);
+  assert.equal(axis.min > -1, true);
+  assert.equal(axis.max > 2, true);
+  assert.equal(axis.min < 0, true);
+  assert.equal(axis.max > 0, true);
 });
 
 test('createMagnitudeAxisStep uses the max value magnitude for indicator tick units', () => {
@@ -110,16 +108,10 @@ test('createPaddedValueAxis removes rounded ticks outside the visible chart doma
     paddingRatio: 0.12,
     roundTo: 10,
   });
-  const macdAxis = createPaddedValueAxis([-1.6, 2.2], {
-    count: 5,
-    paddingRatio: 0.18,
-    includeZero: true,
-    symmetricAroundZero: true,
-    roundTo: 10,
-  });
+  const macdAxis = createMacdValueAxis([-1.6, 2.2]);
 
   assert.deepEqual(rsiAxis.ticks, [80, 70, 60]);
-  assert.deepEqual(macdAxis.ticks, [0]);
+  assert.deepEqual(macdAxis.ticks, [2, 1, -1, -2]);
 });
 
 test('createRsiReferenceLines returns only visible 30 and 70 guide lines', () => {
