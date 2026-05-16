@@ -1,6 +1,7 @@
 import type {
   DailyPrice,
   MacdPoint,
+  MacdSignalPoint,
   MovingAveragePoint,
   RsiPoint,
   RsiSignalPoint,
@@ -75,6 +76,12 @@ type MacdResponse = {
   macd: number;
 };
 
+type MacdSignalResponse = {
+  date: string;
+  macd_ema: number;
+  signal: string;
+};
+
 export function createFastApiStockRepository(baseUrl = '/api'): StockRepository {
   return {
     async getQuote(query) {
@@ -123,6 +130,18 @@ export function createFastApiStockRepository(baseUrl = '/api'): StockRepository 
         ema_long_window: longWindow,
       });
       return response.map(toMacd);
+    },
+    async getMacdSignal(query, shortWindow, longWindow, emaWindow) {
+      const response = await postJson<
+        MacdSignalResponse[],
+        ApiStockQuery & { ema_short_window: number; ema_long_window: number; ema_window: number }
+      >(`${baseUrl}/stock_quote/indicator/macd-signal`, {
+        ...toApiStockQuery(query),
+        ema_short_window: shortWindow,
+        ema_long_window: longWindow,
+        ema_window: emaWindow,
+      });
+      return response.map(toMacdSignal);
     },
   };
 }
@@ -210,3 +229,10 @@ function toMacd(response: MacdResponse): MacdPoint {
   };
 }
 
+function toMacdSignal(response: MacdSignalResponse): MacdSignalPoint {
+  return {
+    date: response.date,
+    macdEma: response.macd_ema,
+    signal: response.signal,
+  };
+}
