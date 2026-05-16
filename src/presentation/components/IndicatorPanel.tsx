@@ -1,12 +1,12 @@
 import { useState, type PointerEvent } from 'react';
 import {
   createDateAxisTicks,
-  createMagnitudeAxisStep,
+  createMacdValueAxis,
   createPaddedValueAxis,
   createRsiReferenceLines,
   findNearestDataIndex,
 } from '../../domain/stock';
-import type { MacdPoint, RsiPoint, RsiSignalPoint } from '../../domain/stock';
+import type { MacdPoint, MacdSignalPoint, RsiPoint, RsiSignalPoint } from '../../domain/stock';
 import { formatDateLabel, formatNumber } from '../format';
 
 type IndicatorPanelProps = {
@@ -16,6 +16,7 @@ type IndicatorPanelProps = {
   rsi?: RsiPoint[];
   rsiSignal?: RsiSignalPoint[];
   macd?: MacdPoint[];
+  macdSignal?: MacdSignalPoint[];
   showDateAxis?: boolean;
   onOpenSettings: () => void;
 };
@@ -32,12 +33,16 @@ export function IndicatorPanel({
   rsi = [],
   rsiSignal = [],
   macd = [],
+  macdSignal = [],
   showDateAxis = false,
   onOpenSettings,
 }: IndicatorPanelProps) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const primary = mode === 'rsi' ? rsi.map((point) => ({ date: point.date, value: point.rsi })) : macd.map((point) => ({ date: point.date, value: point.macd }));
-  const secondary = rsiSignal.map((point) => ({ date: point.date, value: point.rsiEma, signal: point.signal }));
+  const secondary =
+    mode === 'rsi'
+      ? rsiSignal.map((point) => ({ date: point.date, value: point.rsiEma, signal: point.signal }))
+      : macdSignal.map((point) => ({ date: point.date, value: point.macdEma, signal: point.signal }));
   const values = [...primary.map((point) => point.value), ...secondary.map((point) => point.value)];
   const { scale, ticks, referenceLines } = createScale(values, mode);
   const xFor = (index: number, length: number) =>
@@ -245,13 +250,14 @@ function formatIndicatorValue(value: number, mode: 'rsi' | 'macd') {
 }
 
 function createScale(values: number[], mode: 'rsi' | 'macd') {
-  const axis = createPaddedValueAxis(values, {
-    count: 5,
-    paddingRatio: mode === 'macd' ? 0.18 : 0.12,
-    includeZero: mode === 'macd',
-    symmetricAroundZero: mode === 'macd',
-    roundTo: mode === 'macd' ? getMacdRoundTo(values) : 10,
-  });
+  const axis =
+    mode === 'macd'
+      ? createMacdValueAxis(values)
+      : createPaddedValueAxis(values, {
+          count: 5,
+          paddingRatio: 0.12,
+          roundTo: 10,
+        });
   const rawMin = values.length > 0 ? Math.min(...values) : axis.min;
   const rawMax = values.length > 0 ? Math.max(...values) : axis.max;
   const scale = (value: number) => {
@@ -264,11 +270,6 @@ function createScale(values: number[], mode: 'rsi' | 'macd') {
     ticks: axis.ticks,
     referenceLines: mode === 'rsi' ? createRsiReferenceLines(rawMin, rawMax) : [],
   };
-}
-
-function getMacdRoundTo(values: number[]) {
-  const absoluteMax = Math.max(1, ...values.map((value) => Math.abs(value)));
-  return createMagnitudeAxisStep(absoluteMax);
 }
 
 function clamp(value: number, min: number, max: number) {
