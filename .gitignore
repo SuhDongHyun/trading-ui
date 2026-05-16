@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.superpowers/
+.codex/
+*.tsbuildinfo
+.DS_Store
+.gstack/
