@@ -35,12 +35,22 @@ export function ChartShell({ data, isLoading, settings, period, onOpenSettings }
         </div>
       </div>
 
-      {isLoading && !data ? <div className="chart-state">차트 데이터를 불러오는 중입니다.</div> : null}
+      {isLoading && !data ? (
+        <div className="chart-state" role="status" aria-live="polite">
+          <span className="loading-spinner" aria-hidden />
+          <span>차트 데이터를 불러오는 중입니다.</span>
+        </div>
+      ) : null}
       {!isLoading && !data ? <div className="chart-state">조회할 종목과 기간을 입력하세요.</div> : null}
 
       {data ? (
         <>
-          {isLoading ? <div className="subtle-loading">새 설정으로 갱신 중</div> : null}
+          {isLoading ? (
+            <div className="subtle-loading" role="status" aria-live="polite">
+              <span className="loading-spinner small" aria-hidden />
+              <span>새 설정으로 갱신 중</span>
+            </div>
+          ) : null}
           <PriceChart
             prices={data.prices}
             currentPrice={data.quote.currentPrice}

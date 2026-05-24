@@ -15,6 +15,7 @@ const MARKET_LABELS: Record<Market, string> = {
 
 export function QuoteHeader({ quote, code: queryCode, market }: QuoteHeaderProps) {
   const code = quote?.code ?? queryCode;
+  const title = quote?.name || code;
   const marketLabel = quote?.marketName || MARKET_LABELS[market];
   const isUp = (quote?.priceDiff ?? 0) >= 0;
 
@@ -26,7 +27,7 @@ export function QuoteHeader({ quote, code: queryCode, market }: QuoteHeaderProps
             ‹
           </span>
           <div>
-            <h1>{code}</h1>
+            <h1>{title}</h1>
             <p>
               {code} | {marketLabel} | {quote?.industry ?? '시장 데이터'}
             </p>

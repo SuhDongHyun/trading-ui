@@ -21,6 +21,7 @@ export type IndicatorSettings = {
 export type StockQuote = {
   marketName: string;
   code: string;
+  name: string;
   industry: string;
   per: number;
   pbr: number;

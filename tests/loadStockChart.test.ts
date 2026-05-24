@@ -11,6 +11,7 @@ test('loadStockChart uses the selected market for candle prices and moving avera
       return {
         marketName: 'KRX',
         code: query.code,
+        name: '삼성전자',
         industry: '',
         per: 0,
         pbr: 0,
@@ -88,6 +89,7 @@ test('loadStockChart includes MACD signal data using the selected MACD and signa
       return {
         marketName: 'KRX',
         code: query.code,
+        name: '삼성전자',
         industry: '',
         per: 0,
         pbr: 0,

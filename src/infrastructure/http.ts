@@ -51,4 +51,3 @@ async function readErrorMessage(response: Response): Promise<string> {
   }
   return `API request failed with status ${response.status}`;
 }
-
