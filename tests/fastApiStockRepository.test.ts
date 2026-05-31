@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { createFastApiStockRepository } from '../src/infrastructure/fastApiStockRepository.ts';
 import { toQuote } from '../src/infrastructure/stockQuoteMapper.ts';
 
 test('toQuote maps the stock name from the stock_quote response', () => {
@@ -28,4 +29,143 @@ test('toQuote maps the stock name from the stock_quote response', () => {
 
   assert.equal(quote.name, '삼성전자');
   assert.equal(quote.code, '005930');
+});
+
+test('getNews posts the selected code and search date to the stock news API', async () => {
+  const originalFetch = globalThis.fetch;
+  const requests: Array<{ url: string; body: unknown }> = [];
+  globalThis.fetch = async (input, init) => {
+    requests.push({
+      url: String(input),
+      body: JSON.parse(String(init?.body)),
+    });
+    return new Response(
+      JSON.stringify([
+        {
+          title: '삼성전자, 신제품 공개',
+          source: '연합뉴스',
+          published_at: '2026-05-16T09:30:00+09:00',
+        },
+      ]),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  };
+
+  try {
+    const repository = createFastApiStockRepository('/api');
+
+    const news = await repository.getNews('005930', '20260516');
+
+    assert.deepEqual(requests, [
+      {
+        url: '/api/stock_news',
+        body: {
+          code: '005930',
+          search_date: '20260516',
+          search_time: '',
+        },
+      },
+    ]);
+    assert.deepEqual(news, [
+      {
+        title: '삼성전자, 신제품 공개',
+        source: '연합뉴스',
+        publishedAt: '2026-05-16T09:30:00+09:00',
+      },
+    ]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('getVixIndex posts the selected date range to the market indicator API', async () => {
+  const originalFetch = globalThis.fetch;
+  const requests: Array<{ url: string; body: unknown }> = [];
+  globalThis.fetch = async (input, init) => {
+    requests.push({
+      url: String(input),
+      body: JSON.parse(String(init?.body)),
+    });
+    return new Response(
+      JSON.stringify([
+        {
+          date: '20260515',
+          value: 18.42,
+        },
+      ]),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  };
+
+  try {
+    const repository = createFastApiStockRepository('/api');
+
+    const vix = await repository.getVixIndex('2026-04-16', '2026-05-16');
+
+    assert.deepEqual(requests, [
+      {
+        url: '/api/market-indicator/vix-index',
+        body: {
+          start_date: '20260416',
+          end_date: '20260516',
+        },
+      },
+    ]);
+    assert.deepEqual(vix, [
+      {
+        date: '20260515',
+        value: 18.42,
+      },
+    ]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('getFearAndGreedIndex reads the current market sentiment indicator', async () => {
+  const originalFetch = globalThis.fetch;
+  const requests: Array<{ url: string; method: string | undefined }> = [];
+  globalThis.fetch = async (input, init) => {
+    requests.push({
+      url: String(input),
+      method: init?.method,
+    });
+    return new Response(
+      JSON.stringify({
+        value: 64,
+        condition: 'GREED',
+        updated_at: '2026-05-16T08:30:00+09:00',
+      }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  };
+
+  try {
+    const repository = createFastApiStockRepository('/api');
+
+    const fearAndGreed = await repository.getFearAndGreedIndex();
+
+    assert.deepEqual(requests, [
+      {
+        url: '/api/market-indicator/fear-and-greed-index',
+        method: 'GET',
+      },
+    ]);
+    assert.deepEqual(fearAndGreed, {
+      value: 64,
+      condition: 'GREED',
+      updatedAt: '2026-05-16T08:30:00+09:00',
+    });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });

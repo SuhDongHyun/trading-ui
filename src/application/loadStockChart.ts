@@ -11,7 +11,7 @@ export async function loadStockChart(
   query: StockQuery,
   settings: IndicatorSettings,
 ): Promise<StockChartData> {
-  const [quote, prices, movingAverages, rsi, rsiSignal, macd, macdSignal] = await Promise.all([
+  const [quote, prices, movingAverages, rsi, rsiSignal, macd, macdSignal, news, vix, fearAndGreed] = await Promise.all([
     repository.getQuote({ market: query.market, code: query.code }),
     repository.getDailyPrices(query),
     loadMovingAverages(repository, query, settings.movingAverageWindows),
@@ -24,6 +24,9 @@ export async function loadStockChart(
       settings.macdLongWindow,
       settings.rsiSignalEmaWindow,
     ),
+    repository.getNews(query.code, normalizeDate(query.endDate)),
+    repository.getVixIndex(query.startDate, query.endDate),
+    repository.getFearAndGreedIndex(),
   ]);
 
   return {
@@ -34,6 +37,9 @@ export async function loadStockChart(
     rsiSignal,
     macd,
     macdSignal,
+    news,
+    vix,
+    fearAndGreed,
   };
 }
 
@@ -50,4 +56,8 @@ async function loadMovingAverages(
     })),
   );
   return results;
+}
+
+function normalizeDate(date: string): string {
+  return date.replaceAll('-', '');
 }

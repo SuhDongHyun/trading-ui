@@ -1,8 +1,10 @@
-import type { Market, StockQuote } from '../../domain/stock';
+import type { FearAndGreedIndex, Market, StockQuote } from '../../domain/stock';
 import { formatNumber, formatSignedNumber } from '../format';
+import { FearGreedGauge } from './FearGreedGauge';
 
 type QuoteHeaderProps = {
   quote?: StockQuote;
+  fearAndGreed?: FearAndGreedIndex | null;
   code: string;
   market: Market;
 };
@@ -13,7 +15,7 @@ const MARKET_LABELS: Record<Market, string> = {
   UN: '통합',
 };
 
-export function QuoteHeader({ quote, code: queryCode, market }: QuoteHeaderProps) {
+export function QuoteHeader({ quote, fearAndGreed, code: queryCode, market }: QuoteHeaderProps) {
   const code = quote?.code ?? queryCode;
   const title = quote?.name || code;
   const marketLabel = quote?.marketName || MARKET_LABELS[market];
@@ -45,20 +47,23 @@ export function QuoteHeader({ quote, code: queryCode, market }: QuoteHeaderProps
             {isUp ? '▲' : '▼'} {formatSignedNumber(quote?.priceDiff ?? 0)} {quote?.priceDiffRate.toFixed(2) ?? '0.00'}%
           </span>
         </div>
-        <dl>
-          <div>
-            <dt>거래량</dt>
-            <dd>{formatNumber(quote?.currentVolume ?? 0)}주</dd>
-          </div>
-          <div>
-            <dt>PER</dt>
-            <dd>{quote?.per.toFixed(2) ?? '-'}</dd>
-          </div>
-          <div>
-            <dt>PBR</dt>
-            <dd>{quote?.pbr.toFixed(2) ?? '-'}</dd>
-          </div>
-        </dl>
+        <div className="quote-metrics">
+          <dl>
+            <div>
+              <dt>거래량</dt>
+              <dd>{formatNumber(quote?.currentVolume ?? 0)}주</dd>
+            </div>
+            <div>
+              <dt>PER</dt>
+              <dd>{quote?.per.toFixed(2) ?? '-'}</dd>
+            </div>
+            <div>
+              <dt>PBR</dt>
+              <dd>{quote?.pbr.toFixed(2) ?? '-'}</dd>
+            </div>
+          </dl>
+          <FearGreedGauge index={fearAndGreed} />
+        </div>
       </div>
     </header>
   );
