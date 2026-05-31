@@ -86,6 +86,23 @@ export type MacdSignalPoint = {
   signal: 'buy' | 'sell' | 'neutral' | string;
 };
 
+export type StockNewsItem = {
+  title: string;
+  source: string;
+  publishedAt: string;
+};
+
+export type VixIndexPoint = {
+  date: string;
+  value: number;
+};
+
+export type FearAndGreedIndex = {
+  value: number;
+  condition: string;
+  updatedAt: string;
+};
+
 export type StockChartData = {
   quote: StockQuote;
   prices: DailyPrice[];
@@ -94,6 +111,9 @@ export type StockChartData = {
   rsiSignal: RsiSignalPoint[];
   macd: MacdPoint[];
   macdSignal: MacdSignalPoint[];
+  news: StockNewsItem[];
+  vix: VixIndexPoint[];
+  fearAndGreed: FearAndGreedIndex | null;
 };
 
 export type StockRepository = {
@@ -113,6 +133,9 @@ export type StockRepository = {
     longWindow: number,
     emaWindow: number,
   ): Promise<MacdSignalPoint[]>;
+  getNews(code: string, searchDate: string): Promise<StockNewsItem[]>;
+  getVixIndex(startDate: string, endDate: string): Promise<VixIndexPoint[]>;
+  getFearAndGreedIndex(): Promise<FearAndGreedIndex | null>;
 };
 
 export type PriceExtreme = {

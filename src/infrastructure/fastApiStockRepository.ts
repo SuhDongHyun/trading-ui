@@ -2,13 +2,16 @@ import type {
   DailyPrice,
   MacdPoint,
   MacdSignalPoint,
+  FearAndGreedIndex,
   MovingAveragePoint,
   RsiPoint,
   RsiSignalPoint,
+  StockNewsItem,
   StockQuery,
   StockRepository,
+  VixIndexPoint,
 } from '../domain/stock';
-import { postJson } from './http';
+import { getJson, postJson } from './http';
 import { toQuote, type QuoteResponse } from './stockQuoteMapper';
 
 type ApiStockQuery = {
@@ -58,6 +61,23 @@ type MacdSignalResponse = {
   date: string;
   macd_ema: number;
   signal: string;
+};
+
+type StockNewsResponse = {
+  title: string;
+  source: string;
+  published_at: string;
+};
+
+type VixIndexResponse = {
+  date: string;
+  value: number;
+};
+
+type FearAndGreedIndexResponse = {
+  value: number;
+  condition: string;
+  updated_at: string;
 };
 
 export function createFastApiStockRepository(baseUrl = '/api'): StockRepository {
@@ -120,6 +140,31 @@ export function createFastApiStockRepository(baseUrl = '/api'): StockRepository 
         ema_window: emaWindow,
       });
       return response.map(toMacdSignal);
+    },
+    async getNews(code, searchDate) {
+      const response = await postJson<
+        StockNewsResponse[],
+        { code: string; search_date: string; search_time: string }
+      >(`${baseUrl}/stock_news`, {
+        code,
+        search_date: searchDate,
+        search_time: '',
+      });
+      return response.map(toStockNewsItem);
+    },
+    async getVixIndex(startDate, endDate) {
+      const response = await postJson<VixIndexResponse[], { start_date: string; end_date: string }>(
+        `${baseUrl}/market-indicator/vix-index`,
+        {
+          start_date: normalizeDate(startDate),
+          end_date: normalizeDate(endDate),
+        },
+      );
+      return response.map(toVixIndexPoint);
+    },
+    async getFearAndGreedIndex() {
+      const response = await getJson<FearAndGreedIndexResponse>(`${baseUrl}/market-indicator/fear-and-greed-index`);
+      return toFearAndGreedIndex(response);
     },
   };
 }
@@ -188,5 +233,28 @@ function toMacdSignal(response: MacdSignalResponse): MacdSignalPoint {
     date: response.date,
     macdEma: response.macd_ema,
     signal: response.signal,
+  };
+}
+
+function toStockNewsItem(response: StockNewsResponse): StockNewsItem {
+  return {
+    title: response.title,
+    source: response.source,
+    publishedAt: response.published_at,
+  };
+}
+
+function toVixIndexPoint(response: VixIndexResponse): VixIndexPoint {
+  return {
+    date: response.date,
+    value: response.value,
+  };
+}
+
+function toFearAndGreedIndex(response: FearAndGreedIndexResponse): FearAndGreedIndex {
+  return {
+    value: response.value,
+    condition: response.condition,
+    updatedAt: response.updated_at,
   };
 }
