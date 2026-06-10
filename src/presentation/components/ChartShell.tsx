@@ -1,7 +1,6 @@
 import type { IndicatorSettings, Period, StockChartData } from '../../domain/stock';
 import { PriceChart } from './PriceChart';
 import { IndicatorPanel } from './IndicatorPanel';
-import { VixChart } from './VixChart';
 
 type ChartShellProps = {
   data: StockChartData | null;
@@ -76,7 +75,6 @@ export function ChartShell({ data, isLoading, settings, period, onOpenSettings }
             macdSignal={data.macdSignal}
             onOpenSettings={onOpenSettings}
           />
-          <VixChart points={data.vix} isLoading={isLoading} showDateAxis />
         </>
       ) : null}
     </section>

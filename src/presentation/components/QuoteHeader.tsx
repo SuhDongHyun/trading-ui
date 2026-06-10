@@ -1,10 +1,8 @@
-import type { FearAndGreedIndex, Market, StockQuote } from '../../domain/stock';
+import type { Market, StockQuote } from '../../domain/stock';
 import { formatNumber, formatSignedNumber } from '../format';
-import { FearGreedGauge } from './FearGreedGauge';
 
 type QuoteHeaderProps = {
   quote?: StockQuote;
-  fearAndGreed?: FearAndGreedIndex | null;
   code: string;
   market: Market;
 };
@@ -15,7 +13,7 @@ const MARKET_LABELS: Record<Market, string> = {
   UN: '통합',
 };
 
-export function QuoteHeader({ quote, fearAndGreed, code: queryCode, market }: QuoteHeaderProps) {
+export function QuoteHeader({ quote, code: queryCode, market }: QuoteHeaderProps) {
   const code = quote?.code ?? queryCode;
   const title = quote?.name || code;
   const marketLabel = quote?.marketName || MARKET_LABELS[market];
@@ -62,7 +60,6 @@ export function QuoteHeader({ quote, fearAndGreed, code: queryCode, market }: Qu
               <dd>{quote?.pbr.toFixed(2) ?? '-'}</dd>
             </div>
           </dl>
-          <FearGreedGauge index={fearAndGreed} />
         </div>
       </div>
     </header>

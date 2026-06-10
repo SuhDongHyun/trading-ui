@@ -103,6 +103,29 @@ export type FearAndGreedIndex = {
   updatedAt: string;
 };
 
+export type TreasuryYieldPoint = {
+  date: string;
+  yieldRate: number;
+};
+
+export type Sp500IndexPoint = {
+  date: string;
+  openPrice: number;
+  highPrice: number;
+  lowPrice: number;
+  closePrice: number;
+};
+
+export type MarketSummaryData = {
+  startDate: string;
+  endDate: string;
+  fearAndGreed: FearAndGreedIndex | null;
+  vix: VixIndexPoint[];
+  korea10YearTreasuryYield: TreasuryYieldPoint[];
+  us10YearTreasuryYield: TreasuryYieldPoint[];
+  sp500: Sp500IndexPoint[];
+};
+
 export type StockChartData = {
   quote: StockQuote;
   prices: DailyPrice[];
@@ -112,8 +135,6 @@ export type StockChartData = {
   macd: MacdPoint[];
   macdSignal: MacdSignalPoint[];
   news: StockNewsItem[];
-  vix: VixIndexPoint[];
-  fearAndGreed: FearAndGreedIndex | null;
 };
 
 export type StockRepository = {
@@ -134,8 +155,14 @@ export type StockRepository = {
     emaWindow: number,
   ): Promise<MacdSignalPoint[]>;
   getNews(code: string, searchDate: string): Promise<StockNewsItem[]>;
+};
+
+export type MarketIndicatorRepository = {
   getVixIndex(startDate: string, endDate: string): Promise<VixIndexPoint[]>;
   getFearAndGreedIndex(): Promise<FearAndGreedIndex | null>;
+  getKorea10YearTreasuryYield(startDate: string, endDate: string): Promise<TreasuryYieldPoint[]>;
+  getUs10YearTreasuryYield(startDate: string, endDate: string): Promise<TreasuryYieldPoint[]>;
+  getSp500Index(startDate: string, endDate: string): Promise<Sp500IndexPoint[]>;
 };
 
 export type PriceExtreme = {

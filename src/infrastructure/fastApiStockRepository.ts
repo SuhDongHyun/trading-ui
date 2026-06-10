@@ -3,12 +3,15 @@ import type {
   MacdPoint,
   MacdSignalPoint,
   FearAndGreedIndex,
+  MarketIndicatorRepository,
   MovingAveragePoint,
   RsiPoint,
   RsiSignalPoint,
+  Sp500IndexPoint,
   StockNewsItem,
   StockQuery,
   StockRepository,
+  TreasuryYieldPoint,
   VixIndexPoint,
 } from '../domain/stock';
 import { getJson, postJson } from './http';
@@ -80,7 +83,20 @@ type FearAndGreedIndexResponse = {
   updated_at: string;
 };
 
-export function createFastApiStockRepository(baseUrl = '/api'): StockRepository {
+type TreasuryYieldResponse = {
+  date: string;
+  yield_rate: number;
+};
+
+type Sp500IndexResponse = {
+  date: string;
+  open_price: number;
+  high_price: number;
+  low_price: number;
+  close_price: number;
+};
+
+export function createFastApiStockRepository(baseUrl = '/api'): StockRepository & MarketIndicatorRepository {
   return {
     async getQuote(query) {
       const response = await postJson<QuoteResponse, typeof query>(`${baseUrl}/stock_quote`, query);
@@ -165,6 +181,36 @@ export function createFastApiStockRepository(baseUrl = '/api'): StockRepository 
     async getFearAndGreedIndex() {
       const response = await getJson<FearAndGreedIndexResponse>(`${baseUrl}/market-indicator/fear-and-greed-index`);
       return toFearAndGreedIndex(response);
+    },
+    async getKorea10YearTreasuryYield(startDate, endDate) {
+      const response = await postJson<TreasuryYieldResponse[], { start_date: string; end_date: string }>(
+        `${baseUrl}/market-indicator/treasury-yield/korea-10y`,
+        {
+          start_date: normalizeDate(startDate),
+          end_date: normalizeDate(endDate),
+        },
+      );
+      return response.map(toTreasuryYieldPoint);
+    },
+    async getUs10YearTreasuryYield(startDate, endDate) {
+      const response = await postJson<TreasuryYieldResponse[], { start_date: string; end_date: string }>(
+        `${baseUrl}/market-indicator/treasury-yield/us-10y`,
+        {
+          start_date: normalizeDate(startDate),
+          end_date: normalizeDate(endDate),
+        },
+      );
+      return response.map(toTreasuryYieldPoint);
+    },
+    async getSp500Index(startDate, endDate) {
+      const response = await postJson<Sp500IndexResponse[], { start_date: string; end_date: string }>(
+        `${baseUrl}/market-indicator/sp500-index`,
+        {
+          start_date: normalizeDate(startDate),
+          end_date: normalizeDate(endDate),
+        },
+      );
+      return response.map(toSp500IndexPoint);
     },
   };
 }
@@ -256,5 +302,22 @@ function toFearAndGreedIndex(response: FearAndGreedIndexResponse): FearAndGreedI
     value: response.value,
     condition: response.condition,
     updatedAt: response.updated_at,
+  };
+}
+
+function toTreasuryYieldPoint(response: TreasuryYieldResponse): TreasuryYieldPoint {
+  return {
+    date: response.date,
+    yieldRate: response.yield_rate,
+  };
+}
+
+function toSp500IndexPoint(response: Sp500IndexResponse): Sp500IndexPoint {
+  return {
+    date: response.date,
+    openPrice: response.open_price,
+    highPrice: response.high_price,
+    lowPrice: response.low_price,
+    closePrice: response.close_price,
   };
 }

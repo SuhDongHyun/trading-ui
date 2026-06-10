@@ -169,3 +169,124 @@ test('getFearAndGreedIndex reads the current market sentiment indicator', async 
     globalThis.fetch = originalFetch;
   }
 });
+
+test('getKorea10YearTreasuryYield posts the selected date range to the market indicator API', async () => {
+  const originalFetch = globalThis.fetch;
+  const requests: Array<{ url: string; body: unknown }> = [];
+  globalThis.fetch = async (input, init) => {
+    requests.push({
+      url: String(input),
+      body: JSON.parse(String(init?.body)),
+    });
+    return new Response(JSON.stringify([{ date: '20260610', yield_rate: 3.11 }]), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  };
+
+  try {
+    const repository = createFastApiStockRepository('/api');
+
+    const yields = await repository.getKorea10YearTreasuryYield('2026-05-10', '2026-06-10');
+
+    assert.deepEqual(requests, [
+      {
+        url: '/api/market-indicator/treasury-yield/korea-10y',
+        body: {
+          start_date: '20260510',
+          end_date: '20260610',
+        },
+      },
+    ]);
+    assert.deepEqual(yields, [{ date: '20260610', yieldRate: 3.11 }]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('getUs10YearTreasuryYield posts the selected date range to the market indicator API', async () => {
+  const originalFetch = globalThis.fetch;
+  const requests: Array<{ url: string; body: unknown }> = [];
+  globalThis.fetch = async (input, init) => {
+    requests.push({
+      url: String(input),
+      body: JSON.parse(String(init?.body)),
+    });
+    return new Response(JSON.stringify([{ date: '20260610', yield_rate: 4.28 }]), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  };
+
+  try {
+    const repository = createFastApiStockRepository('/api');
+
+    const yields = await repository.getUs10YearTreasuryYield('2026-05-10', '2026-06-10');
+
+    assert.deepEqual(requests, [
+      {
+        url: '/api/market-indicator/treasury-yield/us-10y',
+        body: {
+          start_date: '20260510',
+          end_date: '20260610',
+        },
+      },
+    ]);
+    assert.deepEqual(yields, [{ date: '20260610', yieldRate: 4.28 }]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('getSp500Index posts the selected date range to the market indicator API', async () => {
+  const originalFetch = globalThis.fetch;
+  const requests: Array<{ url: string; body: unknown }> = [];
+  globalThis.fetch = async (input, init) => {
+    requests.push({
+      url: String(input),
+      body: JSON.parse(String(init?.body)),
+    });
+    return new Response(
+      JSON.stringify([
+        {
+          date: '20260610',
+          open_price: 6020,
+          high_price: 6060,
+          low_price: 6000,
+          close_price: 6042.7,
+        },
+      ]),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  };
+
+  try {
+    const repository = createFastApiStockRepository('/api');
+
+    const sp500 = await repository.getSp500Index('2026-05-10', '2026-06-10');
+
+    assert.deepEqual(requests, [
+      {
+        url: '/api/market-indicator/sp500-index',
+        body: {
+          start_date: '20260510',
+          end_date: '20260610',
+        },
+      },
+    ]);
+    assert.deepEqual(sp500, [
+      {
+        date: '20260610',
+        openPrice: 6020,
+        highPrice: 6060,
+        lowPrice: 6000,
+        closePrice: 6042.7,
+      },
+    ]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
