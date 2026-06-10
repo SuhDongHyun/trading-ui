@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "test": "node --experimental-transform-types --loader ./tests/ts-extension-loader.mjs --test tests/*.test.ts",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -20,4 +21,3 @@
     "@types/react-dom": "^19.2.3"
   }
 }
-

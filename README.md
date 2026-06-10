@@ -72,7 +72,7 @@ npm run preview
 production build 결과를 로컬에서 미리 봅니다. 먼저 `npm run build`가 필요합니다.
 
 ```bash
-node --test tests/*.test.ts
+npm test
 ```
 
 도메인 로직과 데이터 로딩 유스케이스 테스트를 실행합니다.
