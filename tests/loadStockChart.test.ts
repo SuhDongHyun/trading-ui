@@ -58,12 +58,6 @@ test('loadStockChart uses the selected market for candle prices and moving avera
     async getNews() {
       return [];
     },
-    async getVixIndex() {
-      return [];
-    },
-    async getFearAndGreedIndex() {
-      return null;
-    },
   };
   const query: StockQuery = {
     market: 'J',
@@ -140,12 +134,6 @@ test('loadStockChart includes MACD signal data using the selected MACD and signa
     },
     async getNews() {
       return [];
-    },
-    async getVixIndex() {
-      return [];
-    },
-    async getFearAndGreedIndex() {
-      return null;
     },
   };
   const query: StockQuery = {
@@ -228,12 +216,6 @@ test('loadStockChart includes news for the selected code and end date', async ()
         },
       ];
     },
-    async getVixIndex() {
-      return [];
-    },
-    async getFearAndGreedIndex() {
-      return null;
-    },
   };
   const query: StockQuery = {
     market: 'J',
@@ -263,9 +245,9 @@ test('loadStockChart includes news for the selected code and end date', async ()
   ]);
 });
 
-test('loadStockChart includes market indicators for the selected date range', async () => {
+test('loadStockChart does not load market summary indicators', async () => {
   const calls: Array<{ method: string; startDate?: string; endDate?: string }> = [];
-  const repository: StockRepository = {
+  const repository = {
     async getQuote(query) {
       return {
         marketName: 'KRX',
@@ -338,10 +320,7 @@ test('loadStockChart includes market indicators for the selected date range', as
 
   const data = await loadStockChart(repository, query, settings);
 
-  assert.deepEqual(calls, [
-    { method: 'getVixIndex', startDate: '2026-04-07', endDate: '2026-05-16' },
-    { method: 'getFearAndGreedIndex' },
-  ]);
-  assert.deepEqual(data.vix, [{ date: '20260515', value: 18.42 }]);
-  assert.deepEqual(data.fearAndGreed, { value: 64, condition: 'GREED', updatedAt: '2026-05-16T08:30:00+09:00' });
+  assert.deepEqual(calls, []);
+  assert.equal('vix' in data, false);
+  assert.equal('fearAndGreed' in data, false);
 });
