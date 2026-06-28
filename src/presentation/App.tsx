@@ -12,7 +12,7 @@ type ActiveTab = 'chart' | 'news';
 type ActivePage = 'summary' | 'stock';
 
 export function App() {
-  const { query, settings, data, isLoading, error, search, updateSettings } = useStockChart();
+  const { query, settings, data, stockOptions, isStockListLoading, isLoading, error, search, updateSettings } = useStockChart();
   const summary = useMarketSummary();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>('chart');
@@ -57,7 +57,12 @@ export function App() {
 
         {activePage === 'stock' ? (
           <>
-            <QueryBar query={query} onSearch={search} />
+            <QueryBar
+              query={query}
+              stockOptions={stockOptions}
+              isStockListLoading={isStockListLoading}
+              onSearch={search}
+            />
             <QuoteHeader quote={data?.quote} code={query.code} market={query.market} />
 
             <nav className="tab-row" aria-label="주식 정보 탭">
