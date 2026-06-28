@@ -92,6 +92,13 @@ export type StockNewsItem = {
   publishedAt: string;
 };
 
+export type StockMetaInfo = {
+  marketName: string;
+  code: string;
+  name: string;
+  department: string;
+};
+
 export type VixIndexPoint = {
   date: string;
   value: number;
@@ -138,6 +145,7 @@ export type StockChartData = {
 };
 
 export type StockRepository = {
+  getKoreaStockList(): Promise<StockMetaInfo[]>;
   getQuote(query: Pick<StockQuery, 'market' | 'code'>): Promise<StockQuote>;
   getDailyPrices(query: StockQuery): Promise<DailyPrice[]>;
   getMovingAverage(query: StockQuery, window: number): Promise<MovingAveragePoint[]>;

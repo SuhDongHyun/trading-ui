@@ -81,7 +81,55 @@ test('getNews posts the selected code and search date to the stock news API', as
   }
 });
 
-test('getVixIndex posts the selected date range to the market indicator API', async () => {
+test('getKoreaStockList reads stock codes and names from the market index API', async () => {
+  const originalFetch = globalThis.fetch;
+  const requests: Array<{ url: string; method: string | undefined }> = [];
+  globalThis.fetch = async (input, init) => {
+    requests.push({
+      url: String(input),
+      method: init?.method,
+    });
+    return new Response(
+      JSON.stringify([
+        {
+          market_name: 'KOSPI',
+          code: '005930',
+          name: '삼성전자',
+          department: '전기전자',
+        },
+      ]),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  };
+
+  try {
+    const repository = createFastApiStockRepository('/api');
+
+    const stockList = await repository.getKoreaStockList();
+
+    assert.deepEqual(requests, [
+      {
+        url: '/api/market-index/korea-stock-list',
+        method: 'GET',
+      },
+    ]);
+    assert.deepEqual(stockList, [
+      {
+        marketName: 'KOSPI',
+        code: '005930',
+        name: '삼성전자',
+        department: '전기전자',
+      },
+    ]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('getVixIndex posts the selected date range to the market index API', async () => {
   const originalFetch = globalThis.fetch;
   const requests: Array<{ url: string; body: unknown }> = [];
   globalThis.fetch = async (input, init) => {
@@ -110,7 +158,7 @@ test('getVixIndex posts the selected date range to the market indicator API', as
 
     assert.deepEqual(requests, [
       {
-        url: '/api/market-indicator/vix-index',
+        url: '/api/market-index/vix-index',
         body: {
           start_date: '20260416',
           end_date: '20260516',
@@ -128,7 +176,7 @@ test('getVixIndex posts the selected date range to the market indicator API', as
   }
 });
 
-test('getFearAndGreedIndex reads the current market sentiment indicator', async () => {
+test('getFearAndGreedIndex reads the current market sentiment index', async () => {
   const originalFetch = globalThis.fetch;
   const requests: Array<{ url: string; method: string | undefined }> = [];
   globalThis.fetch = async (input, init) => {
@@ -156,7 +204,7 @@ test('getFearAndGreedIndex reads the current market sentiment indicator', async 
 
     assert.deepEqual(requests, [
       {
-        url: '/api/market-indicator/fear-and-greed-index',
+        url: '/api/market-index/fear-and-greed-index',
         method: 'GET',
       },
     ]);
@@ -170,7 +218,7 @@ test('getFearAndGreedIndex reads the current market sentiment indicator', async 
   }
 });
 
-test('getKorea10YearTreasuryYield posts the selected date range to the market indicator API', async () => {
+test('getKorea10YearTreasuryYield posts the selected date range to the market index API', async () => {
   const originalFetch = globalThis.fetch;
   const requests: Array<{ url: string; body: unknown }> = [];
   globalThis.fetch = async (input, init) => {
@@ -191,7 +239,7 @@ test('getKorea10YearTreasuryYield posts the selected date range to the market in
 
     assert.deepEqual(requests, [
       {
-        url: '/api/market-indicator/treasury-yield/korea-10y',
+        url: '/api/market-index/treasury-yield/korea-10y',
         body: {
           start_date: '20260510',
           end_date: '20260610',
@@ -204,7 +252,7 @@ test('getKorea10YearTreasuryYield posts the selected date range to the market in
   }
 });
 
-test('getUs10YearTreasuryYield posts the selected date range to the market indicator API', async () => {
+test('getUs10YearTreasuryYield posts the selected date range to the market index API', async () => {
   const originalFetch = globalThis.fetch;
   const requests: Array<{ url: string; body: unknown }> = [];
   globalThis.fetch = async (input, init) => {
@@ -225,7 +273,7 @@ test('getUs10YearTreasuryYield posts the selected date range to the market indic
 
     assert.deepEqual(requests, [
       {
-        url: '/api/market-indicator/treasury-yield/us-10y',
+        url: '/api/market-index/treasury-yield/us-10y',
         body: {
           start_date: '20260510',
           end_date: '20260610',
@@ -238,7 +286,7 @@ test('getUs10YearTreasuryYield posts the selected date range to the market indic
   }
 });
 
-test('getSp500Index posts the selected date range to the market indicator API', async () => {
+test('getSp500Index posts the selected date range to the market index API', async () => {
   const originalFetch = globalThis.fetch;
   const requests: Array<{ url: string; body: unknown }> = [];
   globalThis.fetch = async (input, init) => {
@@ -270,7 +318,7 @@ test('getSp500Index posts the selected date range to the market indicator API', 
 
     assert.deepEqual(requests, [
       {
-        url: '/api/market-indicator/sp500-index',
+        url: '/api/market-index/sp500-index',
         body: {
           start_date: '20260510',
           end_date: '20260610',
