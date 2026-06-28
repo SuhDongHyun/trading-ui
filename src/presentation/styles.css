@@ -110,6 +110,60 @@ button {
   font-weight: 700;
 }
 
+.stock-search-field {
+  position: relative;
+}
+
+.stock-search-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  max-height: 280px;
+  overflow-y: auto;
+  border: 1px solid #cfd3da;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(25, 35, 50, 0.16);
+}
+
+.stock-search-option {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  height: auto;
+  min-height: 48px;
+  border: 0;
+  border-bottom: 1px solid #eef0f3;
+  border-radius: 0;
+  padding: 8px 10px;
+  background: #fff;
+  color: #181b20;
+  text-align: left;
+}
+
+.stock-search-option:hover,
+.stock-search-option:focus {
+  background: #f3f6f9;
+}
+
+.stock-search-option span {
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.stock-search-option small,
+.stock-search-empty {
+  color: #717985;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.stock-search-empty {
+  padding: 12px 10px;
+}
+
 .query-bar input,
 .query-bar select,
 .settings-form input {

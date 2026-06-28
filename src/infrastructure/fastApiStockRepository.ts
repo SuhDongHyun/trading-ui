@@ -9,6 +9,7 @@ import type {
   RsiSignalPoint,
   Sp500IndexPoint,
   StockNewsItem,
+  StockMetaInfo,
   StockQuery,
   StockRepository,
   TreasuryYieldPoint,
@@ -72,6 +73,13 @@ type StockNewsResponse = {
   published_at: string;
 };
 
+type StockMetaInfoResponse = {
+  market_name: string;
+  code: string;
+  name: string;
+  department: string;
+};
+
 type VixIndexResponse = {
   date: string;
   value: number;
@@ -98,6 +106,10 @@ type Sp500IndexResponse = {
 
 export function createFastApiStockRepository(baseUrl = '/api'): StockRepository & MarketIndicatorRepository {
   return {
+    async getKoreaStockList() {
+      const response = await getJson<StockMetaInfoResponse[]>(`${baseUrl}/market-index/korea-stock-list`);
+      return response.map(toStockMetaInfo);
+    },
     async getQuote(query) {
       const response = await postJson<QuoteResponse, typeof query>(`${baseUrl}/stock_quote`, query);
       return toQuote(response);
@@ -170,7 +182,7 @@ export function createFastApiStockRepository(baseUrl = '/api'): StockRepository 
     },
     async getVixIndex(startDate, endDate) {
       const response = await postJson<VixIndexResponse[], { start_date: string; end_date: string }>(
-        `${baseUrl}/market-indicator/vix-index`,
+        `${baseUrl}/market-index/vix-index`,
         {
           start_date: normalizeDate(startDate),
           end_date: normalizeDate(endDate),
@@ -179,12 +191,12 @@ export function createFastApiStockRepository(baseUrl = '/api'): StockRepository 
       return response.map(toVixIndexPoint);
     },
     async getFearAndGreedIndex() {
-      const response = await getJson<FearAndGreedIndexResponse>(`${baseUrl}/market-indicator/fear-and-greed-index`);
+      const response = await getJson<FearAndGreedIndexResponse>(`${baseUrl}/market-index/fear-and-greed-index`);
       return toFearAndGreedIndex(response);
     },
     async getKorea10YearTreasuryYield(startDate, endDate) {
       const response = await postJson<TreasuryYieldResponse[], { start_date: string; end_date: string }>(
-        `${baseUrl}/market-indicator/treasury-yield/korea-10y`,
+        `${baseUrl}/market-index/treasury-yield/korea-10y`,
         {
           start_date: normalizeDate(startDate),
           end_date: normalizeDate(endDate),
@@ -194,7 +206,7 @@ export function createFastApiStockRepository(baseUrl = '/api'): StockRepository 
     },
     async getUs10YearTreasuryYield(startDate, endDate) {
       const response = await postJson<TreasuryYieldResponse[], { start_date: string; end_date: string }>(
-        `${baseUrl}/market-indicator/treasury-yield/us-10y`,
+        `${baseUrl}/market-index/treasury-yield/us-10y`,
         {
           start_date: normalizeDate(startDate),
           end_date: normalizeDate(endDate),
@@ -204,7 +216,7 @@ export function createFastApiStockRepository(baseUrl = '/api'): StockRepository 
     },
     async getSp500Index(startDate, endDate) {
       const response = await postJson<Sp500IndexResponse[], { start_date: string; end_date: string }>(
-        `${baseUrl}/market-indicator/sp500-index`,
+        `${baseUrl}/market-index/sp500-index`,
         {
           start_date: normalizeDate(startDate),
           end_date: normalizeDate(endDate),
@@ -212,6 +224,15 @@ export function createFastApiStockRepository(baseUrl = '/api'): StockRepository 
       );
       return response.map(toSp500IndexPoint);
     },
+  };
+}
+
+function toStockMetaInfo(response: StockMetaInfoResponse): StockMetaInfo {
+  return {
+    marketName: response.market_name,
+    code: response.code,
+    name: response.name,
+    department: response.department,
   };
 }
 

@@ -1,20 +1,42 @@
-import { useState, type FormEvent } from 'react';
-import type { Market, Period, StockQuery } from '../../domain/stock';
+import { useMemo, useState, type FormEvent, type FocusEvent } from 'react';
+import type { Market, Period, StockMetaInfo, StockQuery } from '../../domain/stock';
+import { filterStockOptions, resolveStockSearchInput } from '../stockSearch';
 
 type QueryBarProps = {
   query: StockQuery;
+  stockOptions: StockMetaInfo[];
+  isStockListLoading: boolean;
   onSearch: (query: StockQuery) => void;
 };
 
-export function QueryBar({ query, onSearch }: QueryBarProps) {
+export function QueryBar({ query, stockOptions, isStockListLoading, onSearch }: QueryBarProps) {
   const [draft, setDraft] = useState(query);
+  const [stockInput, setStockInput] = useState(query.code);
+  const [isStockMenuOpen, setIsStockMenuOpen] = useState(false);
+  const filteredStockOptions = useMemo(
+    () => filterStockOptions(stockOptions, stockInput).slice(0, 80),
+    [stockInput, stockOptions],
+  );
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const code = resolveStockSearchInput(stockOptions, stockInput);
     onSearch({
       ...draft,
-      code: draft.code.trim(),
+      code,
     });
+  }
+
+  function selectStock(stock: StockMetaInfo) {
+    setStockInput(stock.name);
+    setDraft({ ...draft, code: stock.code });
+    setIsStockMenuOpen(false);
+  }
+
+  function closeStockMenu(event: FocusEvent<HTMLLabelElement>) {
+    if (!event.currentTarget.contains(event.relatedTarget)) {
+      setIsStockMenuOpen(false);
+    }
   }
 
   return (
@@ -30,14 +52,44 @@ export function QueryBar({ query, onSearch }: QueryBarProps) {
           <option value="UN">통합(UN)</option>
         </select>
       </label>
-      <label>
+      <label className="stock-search-field" onBlur={closeStockMenu}>
         종목
         <input
-          value={draft.code}
-          maxLength={12}
-          inputMode="numeric"
-          onChange={(event) => setDraft({ ...draft, code: event.target.value })}
+          value={stockInput}
+          maxLength={40}
+          autoComplete="off"
+          onFocus={() => setIsStockMenuOpen(true)}
+          onChange={(event) => {
+            setStockInput(event.target.value);
+            setDraft({ ...draft, code: event.target.value });
+            setIsStockMenuOpen(true);
+          }}
         />
+        {isStockMenuOpen ? (
+          <div className="stock-search-menu" role="listbox" aria-label="종목 검색 결과">
+            {isStockListLoading ? <div className="stock-search-empty">종목 목록을 불러오는 중</div> : null}
+            {!isStockListLoading && filteredStockOptions.length === 0 ? (
+              <div className="stock-search-empty">일치하는 종목이 없습니다</div>
+            ) : null}
+            {!isStockListLoading
+              ? filteredStockOptions.map((stock) => (
+                  <button
+                    type="button"
+                    key={stock.code}
+                    className="stock-search-option"
+                    role="option"
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => selectStock(stock)}
+                  >
+                    <span>{stock.name}</span>
+                    <small>
+                      {stock.code} | {stock.marketName}
+                    </small>
+                  </button>
+                ))
+              : null}
+          </div>
+        ) : null}
       </label>
       <label>
         시작일

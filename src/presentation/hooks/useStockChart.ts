@@ -1,10 +1,11 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { loadStockChart } from '../../application/loadStockChart';
 import {
   DEFAULT_INDICATOR_SETTINGS,
   DEFAULT_QUERY,
   type IndicatorSettings,
   type StockChartData,
+  type StockMetaInfo,
   type StockQuery,
 } from '../../domain/stock';
 import { createFastApiStockRepository } from '../../infrastructure/fastApiStockRepository';
@@ -13,6 +14,8 @@ type StockChartState = {
   query: StockQuery;
   settings: IndicatorSettings;
   data: StockChartData | null;
+  stockOptions: StockMetaInfo[];
+  isStockListLoading: boolean;
   isLoading: boolean;
   error: string | null;
   search: (nextQuery: StockQuery) => void;
@@ -24,8 +27,37 @@ export function useStockChart(): StockChartState {
   const [query, setQuery] = useState<StockQuery>(DEFAULT_QUERY);
   const [settings, setSettings] = useState<IndicatorSettings>(DEFAULT_INDICATOR_SETTINGS);
   const [data, setData] = useState<StockChartData | null>(null);
+  const [stockOptions, setStockOptions] = useState<StockMetaInfo[]>([]);
+  const [isStockListLoading, setIsStockListLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    setIsStockListLoading(true);
+
+    repository
+      .getKoreaStockList()
+      .then((result) => {
+        if (active) {
+          setStockOptions(result);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setStockOptions([]);
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setIsStockListLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [repository]);
 
   const refresh = useCallback(
     async (activeQuery: StockQuery, activeSettings: IndicatorSettings) => {
@@ -66,6 +98,8 @@ export function useStockChart(): StockChartState {
     query,
     settings,
     data,
+    stockOptions,
+    isStockListLoading,
     isLoading,
     error,
     search,
