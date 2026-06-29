@@ -582,6 +582,10 @@ button {
   color: #d9284c;
 }
 
+.gold-text {
+  color: #c58b24;
+}
+
 .summary-page {
   position: relative;
   background: #fff;
@@ -719,6 +723,20 @@ button {
   font-weight: 950;
 }
 
+.summary-metric-detail {
+  color: #727a85;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.summary-metric-detail.up {
+  color: #d9284c;
+}
+
+.summary-metric-detail.down {
+  color: #3574d4;
+}
+
 .summary-chart-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -732,7 +750,7 @@ button {
   padding: 16px 16px 10px;
 }
 
-.summary-chart-card.sp500-card {
+.summary-chart-card.wide-chart-card {
   grid-column: 1 / -1;
 }
 
@@ -750,11 +768,7 @@ button {
   font-size: 19px;
 }
 
-.summary-chart-card.sp500-card .summary-chart-header h2 {
-  font-size: 22px;
-}
-
-.summary-chart-card:not(.sp500-card) .summary-chart-header h2 {
+.summary-chart-card .summary-chart-header h2 {
   font-size: 21px;
 }
 
@@ -773,6 +787,10 @@ button {
   align-items: center;
   justify-content: flex-end;
   margin: 0;
+}
+
+.summary-volume-axis-label {
+  fill: #9a6b16;
 }
 
 .summary-line-chart,
@@ -799,11 +817,11 @@ button {
 }
 
 .summary-candle-chart .summary-axis-label {
-  font-size: 15px;
+  font-size: 20px;
 }
 
 .summary-candle-chart .summary-date-label {
-  font-size: 14px;
+  font-size: 18px;
 }
 
 .news-panel {
@@ -1060,7 +1078,7 @@ button {
     padding-right: 18px;
   }
 
-  .summary-chart-card.sp500-card {
+  .summary-chart-card.wide-chart-card {
     grid-column: auto;
   }
 
