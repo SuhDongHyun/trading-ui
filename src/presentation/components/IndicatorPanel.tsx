@@ -4,9 +4,9 @@ import {
   createMacdValueAxis,
   createPaddedValueAxis,
   createRsiReferenceLines,
-  findNearestDataIndex,
 } from '../../domain/stock';
 import type { MacdPoint, MacdSignalPoint, RsiPoint, RsiSignalPoint } from '../../domain/stock';
+import { findNearestSvgChartPointerIndex, placeTooltipAwayFromPointer, shouldClearTooltipOnPointerLeave } from '../chartTooltipInteraction';
 import { formatDateLabel, formatNumber } from '../format';
 
 type IndicatorPanelProps = {
@@ -57,8 +57,14 @@ export function IndicatorPanel({
       return;
     }
 
-    const point = toSvgPoint(event, WIDTH, HEIGHT);
-    setHoverIndex(findNearestDataIndex(point.x, primary.length, PADDING.left, WIDTH - PADDING.left - PADDING.right));
+    const bounds = event.currentTarget.getBoundingClientRect();
+    setHoverIndex(findNearestSvgChartPointerIndex(event.clientX, bounds, WIDTH, primary.length, PADDING.left, WIDTH - PADDING.left - PADDING.right));
+  }
+
+  function handlePointerLeave(event: PointerEvent<SVGSVGElement>) {
+    if (shouldClearTooltipOnPointerLeave(event.pointerType)) {
+      setHoverIndex(null);
+    }
   }
 
   return (
@@ -78,8 +84,9 @@ export function IndicatorPanel({
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         role="img"
         aria-label={`${title} 차트`}
+        onPointerDown={handlePointerMove}
         onPointerMove={handlePointerMove}
-        onPointerLeave={() => setHoverIndex(null)}
+        onPointerLeave={handlePointerLeave}
       >
         <line x1="0" x2={WIDTH} y1={PADDING.top} y2={PADDING.top} stroke="#f0f0f0" />
         <line x1="0" x2={WIDTH} y1={HEIGHT - PADDING.bottom} y2={HEIGHT - PADDING.bottom} stroke="#eeeeee" />
@@ -221,7 +228,7 @@ function IndicatorTooltip({
 }) {
   const tooltipWidth = 156;
   const tooltipHeight = secondary ? 82 : 64;
-  const tooltipX = clamp(x + 12, PADDING.left, WIDTH - PADDING.right - tooltipWidth);
+  const tooltipX = placeTooltipAwayFromPointer(x, tooltipWidth, WIDTH, PADDING.left, PADDING.right, 12);
   const tooltipY = clamp(y - tooltipHeight / 2, PADDING.top, HEIGHT - PADDING.bottom - tooltipHeight);
   return (
     <g className="chart-tooltip">
@@ -274,12 +281,4 @@ function createScale(values: number[], mode: 'rsi' | 'macd') {
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
-}
-
-function toSvgPoint(event: PointerEvent<SVGSVGElement>, width: number, height: number) {
-  const rect = event.currentTarget.getBoundingClientRect();
-  return {
-    x: ((event.clientX - rect.left) / rect.width) * width,
-    y: ((event.clientY - rect.top) / rect.height) * height,
-  };
 }
