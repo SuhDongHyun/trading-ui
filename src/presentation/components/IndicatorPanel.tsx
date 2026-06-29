@@ -6,7 +6,12 @@ import {
   createRsiReferenceLines,
 } from '../../domain/stock';
 import type { MacdPoint, MacdSignalPoint, RsiPoint, RsiSignalPoint } from '../../domain/stock';
-import { findNearestSvgChartPointerIndex, placeTooltipAwayFromPointer, shouldClearTooltipOnPointerLeave } from '../chartTooltipInteraction';
+import {
+  findNearestSvgChartPointerIndex,
+  placeTooltipAwayFromPointer,
+  shouldClearTooltipOnPointerEnd,
+  shouldClearTooltipOnPointerLeave,
+} from '../chartTooltipInteraction';
 import { formatDateLabel, formatNumber } from '../format';
 
 type IndicatorPanelProps = {
@@ -67,6 +72,12 @@ export function IndicatorPanel({
     }
   }
 
+  function handlePointerEnd(event: PointerEvent<SVGSVGElement>) {
+    if (shouldClearTooltipOnPointerEnd(event.pointerType)) {
+      setHoverIndex(null);
+    }
+  }
+
   return (
     <div className="chart-block indicator-block">
       <div className="legend-row compact">
@@ -86,6 +97,8 @@ export function IndicatorPanel({
         aria-label={`${title} 차트`}
         onPointerDown={handlePointerMove}
         onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerEnd}
+        onPointerCancel={handlePointerEnd}
         onPointerLeave={handlePointerLeave}
       >
         <line x1="0" x2={WIDTH} y1={PADDING.top} y2={PADDING.top} stroke="#f0f0f0" />

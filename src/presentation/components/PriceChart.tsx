@@ -7,7 +7,12 @@ import {
   type MovingAverageSeries,
   type PriceExtreme,
 } from '../../domain/stock';
-import { findNearestSvgChartPointerIndex, placeTooltipAwayFromPointer, shouldClearTooltipOnPointerLeave } from '../chartTooltipInteraction';
+import {
+  findNearestSvgChartPointerIndex,
+  placeTooltipAwayFromPointer,
+  shouldClearTooltipOnPointerEnd,
+  shouldClearTooltipOnPointerLeave,
+} from '../chartTooltipInteraction';
 import { formatDateLabel, formatNumber } from '../format';
 
 type PriceChartProps = {
@@ -58,6 +63,12 @@ export function PriceChart({ prices, currentPrice, priceDiffRate, movingAverages
     }
   }
 
+  function handlePointerEnd(event: PointerEvent<SVGSVGElement>) {
+    if (shouldClearTooltipOnPointerEnd(event.pointerType)) {
+      setHoverIndex(null);
+    }
+  }
+
   return (
     <div className="chart-block price-block">
       <div className="legend-row">
@@ -84,6 +95,8 @@ export function PriceChart({ prices, currentPrice, priceDiffRate, movingAverages
         aria-label="가격 차트"
         onPointerDown={handlePointerMove}
         onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerEnd}
+        onPointerCancel={handlePointerEnd}
         onPointerLeave={handlePointerLeave}
       >
         <Grid width={WIDTH} height={HEIGHT} padding={PADDING} />

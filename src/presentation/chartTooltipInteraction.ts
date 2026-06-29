@@ -6,7 +6,11 @@ type ChartBounds = {
 };
 
 export function shouldClearTooltipOnPointerLeave(pointerType: string) {
-  return pointerType === 'mouse';
+  return pointerType === 'mouse' || pointerType === 'touch' || pointerType === 'pen';
+}
+
+export function shouldClearTooltipOnPointerEnd(pointerType: string) {
+  return pointerType !== 'mouse';
 }
 
 export function findNearestChartPointerIndex(clientX: number, bounds: ChartBounds, dataLength: number) {

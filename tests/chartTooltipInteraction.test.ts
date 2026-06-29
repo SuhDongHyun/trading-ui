@@ -3,13 +3,20 @@ import { test } from 'node:test';
 import {
   findNearestChartPointerIndex,
   placeTooltipAwayFromPointer,
+  shouldClearTooltipOnPointerEnd,
   shouldClearTooltipOnPointerLeave,
 } from '../src/presentation/chartTooltipInteraction.ts';
 
-test('shouldClearTooltipOnPointerLeave keeps touch and pen tooltips open after the pointer leaves', () => {
+test('shouldClearTooltipOnPointerLeave clears tooltips for every pointer type', () => {
   assert.equal(shouldClearTooltipOnPointerLeave('mouse'), true);
-  assert.equal(shouldClearTooltipOnPointerLeave('touch'), false);
-  assert.equal(shouldClearTooltipOnPointerLeave('pen'), false);
+  assert.equal(shouldClearTooltipOnPointerLeave('touch'), true);
+  assert.equal(shouldClearTooltipOnPointerLeave('pen'), true);
+});
+
+test('shouldClearTooltipOnPointerEnd clears touch and pen tooltips after interaction ends', () => {
+  assert.equal(shouldClearTooltipOnPointerEnd('mouse'), false);
+  assert.equal(shouldClearTooltipOnPointerEnd('touch'), true);
+  assert.equal(shouldClearTooltipOnPointerEnd('pen'), true);
 });
 
 test('findNearestChartPointerIndex maps client x into a bounded chart index', () => {

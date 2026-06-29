@@ -4,7 +4,11 @@ import {
   createPaddedValueAxis,
   type VixIndexPoint,
 } from '../../domain/stock';
-import { findNearestSvgChartPointerIndex, shouldClearTooltipOnPointerLeave } from '../chartTooltipInteraction';
+import {
+  findNearestSvgChartPointerIndex,
+  shouldClearTooltipOnPointerEnd,
+  shouldClearTooltipOnPointerLeave,
+} from '../chartTooltipInteraction';
 import { formatDateLabel } from '../format';
 
 type VixChartProps = {
@@ -60,6 +64,12 @@ export function VixChart({ points, isLoading, showDateAxis = false }: VixChartPr
     }
   }
 
+  function handlePointerEnd(event: PointerEvent<SVGSVGElement>) {
+    if (shouldClearTooltipOnPointerEnd(event.pointerType)) {
+      setHoverIndex(null);
+    }
+  }
+
   return (
     <section className="vix-panel" aria-labelledby="vix-panel-title">
       <div className="vix-panel-header">
@@ -77,6 +87,8 @@ export function VixChart({ points, isLoading, showDateAxis = false }: VixChartPr
           aria-label="VIX 지표 차트"
           onPointerDown={handlePointerMove}
           onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerEnd}
+          onPointerCancel={handlePointerEnd}
           onPointerLeave={handlePointerLeave}
         >
           {[0, 1, 2, 3, 4].map((line) => {
