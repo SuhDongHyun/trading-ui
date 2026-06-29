@@ -18,6 +18,7 @@ test('createDefaultQuery sets the date range from one month ago through today', 
   const query = createDefaultQuery(new Date(2026, 4, 16));
 
   assert.equal(query.market, 'J');
+  assert.equal(query.code, '');
   assert.equal(query.startDate, '2026-04-16');
   assert.equal(query.endDate, '2026-05-16');
 });

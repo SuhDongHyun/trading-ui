@@ -1,17 +1,18 @@
 import { useMemo, useState, type FormEvent, type FocusEvent } from 'react';
 import type { Market, Period, StockMetaInfo, StockQuery } from '../../domain/stock';
-import { filterStockOptions, resolveStockSearchInput } from '../stockSearch';
+import { filterStockOptions, resolveStockSearchSelection } from '../stockSearch';
 
 type QueryBarProps = {
   query: StockQuery;
+  stockInput: string;
   stockOptions: StockMetaInfo[];
   isStockListLoading: boolean;
+  onStockInputChange: (input: string) => void;
   onSearch: (query: StockQuery) => void;
 };
 
-export function QueryBar({ query, stockOptions, isStockListLoading, onSearch }: QueryBarProps) {
+export function QueryBar({ query, stockInput, stockOptions, isStockListLoading, onStockInputChange, onSearch }: QueryBarProps) {
   const [draft, setDraft] = useState(query);
-  const [stockInput, setStockInput] = useState(query.code);
   const [isStockMenuOpen, setIsStockMenuOpen] = useState(false);
   const filteredStockOptions = useMemo(
     () => filterStockOptions(stockOptions, stockInput).slice(0, 80),
@@ -20,15 +21,16 @@ export function QueryBar({ query, stockOptions, isStockListLoading, onSearch }: 
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const code = resolveStockSearchInput(stockOptions, stockInput);
+    const selection = resolveStockSearchSelection(stockOptions, stockInput);
+    onStockInputChange(selection.displayInput);
     onSearch({
       ...draft,
-      code,
+      code: selection.code,
     });
   }
 
   function selectStock(stock: StockMetaInfo) {
-    setStockInput(stock.name);
+    onStockInputChange(stock.name);
     setDraft({ ...draft, code: stock.code });
     setIsStockMenuOpen(false);
   }
@@ -60,7 +62,7 @@ export function QueryBar({ query, stockOptions, isStockListLoading, onSearch }: 
           autoComplete="off"
           onFocus={() => setIsStockMenuOpen(true)}
           onChange={(event) => {
-            setStockInput(event.target.value);
+            onStockInputChange(event.target.value);
             setDraft({ ...draft, code: event.target.value });
             setIsStockMenuOpen(true);
           }}

@@ -17,6 +17,7 @@ export function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>('chart');
   const [activePage, setActivePage] = useState<ActivePage>('summary');
+  const [stockInput, setStockInput] = useState(query.code);
 
   return (
     <main className="app-shell">
@@ -59,8 +60,10 @@ export function App() {
           <>
             <QueryBar
               query={query}
+              stockInput={stockInput}
               stockOptions={stockOptions}
               isStockListLoading={isStockListLoading}
+              onStockInputChange={setStockInput}
               onSearch={search}
             />
             <QuoteHeader quote={data?.quote} code={query.code} market={query.market} />

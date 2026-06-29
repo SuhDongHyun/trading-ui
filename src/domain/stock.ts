@@ -238,7 +238,7 @@ export function createDefaultQuery(today = new Date()): StockQuery {
 
   return {
     market: 'J',
-    code: '005930',
+    code: '',
     startDate: formatDateInput(start),
     endDate,
     period: 'D',
