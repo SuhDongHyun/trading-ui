@@ -11,7 +11,11 @@ import {
   type TreasuryYieldPoint,
   type VolatilityIndexPoint,
 } from '../../domain/stock';
-import { findNearestChartPointerIndex, shouldClearTooltipOnPointerLeave } from '../chartTooltipInteraction';
+import {
+  findNearestChartPointerIndex,
+  shouldClearTooltipOnPointerEnd,
+  shouldClearTooltipOnPointerLeave,
+} from '../chartTooltipInteraction';
 import { formatCompact, formatDateLabel, formatNumber, formatSignedNumber } from '../format';
 import { FearGreedGauge } from './FearGreedGauge';
 
@@ -232,6 +236,11 @@ function MarketLineChart<TPoint extends { date: string }>({
       setHoverIndex(null);
     }
   };
+  const handlePointerEnd = (event: PointerEvent<SVGRectElement>) => {
+    if (shouldClearTooltipOnPointerEnd(event.pointerType)) {
+      setHoverIndex(null);
+    }
+  };
 
   return (
     <section className="summary-chart-card">
@@ -268,6 +277,8 @@ function MarketLineChart<TPoint extends { date: string }>({
           fill="transparent"
           onPointerDown={handlePointerMove}
           onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerEnd}
+          onPointerCancel={handlePointerEnd}
           onPointerLeave={handlePointerLeave}
         />
         {hoveredPoint ? (
@@ -340,6 +351,11 @@ function MarketIndexVolumeChart({
       setHoverIndex(null);
     }
   };
+  const handlePointerEnd = (event: PointerEvent<SVGRectElement>) => {
+    if (shouldClearTooltipOnPointerEnd(event.pointerType)) {
+      setHoverIndex(null);
+    }
+  };
 
   return (
     <section className="summary-chart-card">
@@ -401,6 +417,8 @@ function MarketIndexVolumeChart({
           fill="transparent"
           onPointerDown={handlePointerMove}
           onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerEnd}
+          onPointerCancel={handlePointerEnd}
           onPointerLeave={handlePointerLeave}
         />
         {hoveredPoint ? (
@@ -470,6 +488,11 @@ function MarketCandlestickChart({
       setHoverIndex(null);
     }
   };
+  const handlePointerEnd = (event: PointerEvent<SVGRectElement>) => {
+    if (shouldClearTooltipOnPointerEnd(event.pointerType)) {
+      setHoverIndex(null);
+    }
+  };
 
   return (
     <section className="summary-chart-card">
@@ -514,6 +537,8 @@ function MarketCandlestickChart({
           fill="transparent"
           onPointerDown={handlePointerMove}
           onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerEnd}
+          onPointerCancel={handlePointerEnd}
           onPointerLeave={handlePointerLeave}
         />
         {hoveredPoint ? (
@@ -577,6 +602,11 @@ function TreasuryYieldChart({ korea, us }: { korea: TreasuryYieldPoint[]; us: Tr
       setHoverIndex(null);
     }
   };
+  const handlePointerEnd = (event: PointerEvent<SVGRectElement>) => {
+    if (shouldClearTooltipOnPointerEnd(event.pointerType)) {
+      setHoverIndex(null);
+    }
+  };
 
   return (
     <section className="summary-chart-card wide-chart-card">
@@ -623,6 +653,8 @@ function TreasuryYieldChart({ korea, us }: { korea: TreasuryYieldPoint[]; us: Tr
           fill="transparent"
           onPointerDown={handlePointerMove}
           onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerEnd}
+          onPointerCancel={handlePointerEnd}
           onPointerLeave={handlePointerLeave}
         />
         {hoveredDate ? (
@@ -680,6 +712,11 @@ function Sp500CandlestickChart({ points, xAxisDates }: { points: Sp500IndexPoint
       setHoverIndex(null);
     }
   };
+  const handlePointerEnd = (event: PointerEvent<SVGRectElement>) => {
+    if (shouldClearTooltipOnPointerEnd(event.pointerType)) {
+      setHoverIndex(null);
+    }
+  };
 
   return (
     <section className="summary-chart-card">
@@ -724,6 +761,8 @@ function Sp500CandlestickChart({ points, xAxisDates }: { points: Sp500IndexPoint
           fill="transparent"
           onPointerDown={handlePointerMove}
           onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerEnd}
+          onPointerCancel={handlePointerEnd}
           onPointerLeave={handlePointerLeave}
         />
         {hoveredPoint ? (
