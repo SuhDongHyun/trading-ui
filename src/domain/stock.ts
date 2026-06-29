@@ -123,11 +123,35 @@ export type Sp500IndexPoint = {
   closePrice: number;
 };
 
+export type MarketOhlcPoint = {
+  date: string;
+  openPrice: number;
+  highPrice: number;
+  lowPrice: number;
+  closePrice: number;
+};
+
+export type MarketIndexPoint = MarketOhlcPoint & {
+  priceDiff: number;
+  priceDiffRate: number;
+  volume: number;
+  tradingValue: number;
+};
+
+export type VolatilityIndexPoint = MarketOhlcPoint & {
+  priceDiff: number;
+  priceDiffRate: number;
+};
+
 export type MarketSummaryData = {
   startDate: string;
   endDate: string;
   fearAndGreed: FearAndGreedIndex | null;
   vix: VixIndexPoint[];
+  vkospi: VolatilityIndexPoint[];
+  usdKrwExchangeRate: MarketOhlcPoint[];
+  kospi: MarketIndexPoint[];
+  kosdaq: MarketIndexPoint[];
   korea10YearTreasuryYield: TreasuryYieldPoint[];
   us10YearTreasuryYield: TreasuryYieldPoint[];
   sp500: Sp500IndexPoint[];
@@ -167,6 +191,10 @@ export type StockRepository = {
 
 export type MarketIndicatorRepository = {
   getVixIndex(startDate: string, endDate: string): Promise<VixIndexPoint[]>;
+  getVkospiIndex(startDate: string, endDate: string): Promise<VolatilityIndexPoint[]>;
+  getUsdKrwExchangeRate(startDate: string, endDate: string): Promise<MarketOhlcPoint[]>;
+  getKospiIndex(startDate: string, endDate: string): Promise<MarketIndexPoint[]>;
+  getKosdaqIndex(startDate: string, endDate: string): Promise<MarketIndexPoint[]>;
   getFearAndGreedIndex(): Promise<FearAndGreedIndex | null>;
   getKorea10YearTreasuryYield(startDate: string, endDate: string): Promise<TreasuryYieldPoint[]>;
   getUs10YearTreasuryYield(startDate: string, endDate: string): Promise<TreasuryYieldPoint[]>;
@@ -210,7 +238,7 @@ export function createDefaultQuery(today = new Date()): StockQuery {
 
   return {
     market: 'J',
-    code: '005930',
+    code: '',
     startDate: formatDateInput(start),
     endDate,
     period: 'D',

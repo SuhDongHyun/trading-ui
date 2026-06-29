@@ -4,6 +4,8 @@ import type {
   MacdSignalPoint,
   FearAndGreedIndex,
   MarketIndicatorRepository,
+  MarketIndexPoint,
+  MarketOhlcPoint,
   MovingAveragePoint,
   RsiPoint,
   RsiSignalPoint,
@@ -14,6 +16,7 @@ import type {
   StockRepository,
   TreasuryYieldPoint,
   VixIndexPoint,
+  VolatilityIndexPoint,
 } from '../domain/stock';
 import { getJson, postJson } from './http';
 import { toQuote, type QuoteResponse } from './stockQuoteMapper';
@@ -104,6 +107,26 @@ type Sp500IndexResponse = {
   close_price: number;
 };
 
+type MarketOhlcResponse = {
+  date: string;
+  open_price: number;
+  high_price: number;
+  low_price: number;
+  close_price: number;
+};
+
+type MarketIndexResponse = MarketOhlcResponse & {
+  price_diff: number;
+  price_diff_rate: number;
+  volume: number;
+  trading_value: number;
+};
+
+type VolatilityIndexResponse = MarketOhlcResponse & {
+  price_diff: number;
+  price_diff_rate: number;
+};
+
 export function createFastApiStockRepository(baseUrl = '/api'): StockRepository & MarketIndicatorRepository {
   return {
     async getKoreaStockList() {
@@ -190,6 +213,26 @@ export function createFastApiStockRepository(baseUrl = '/api'): StockRepository 
       );
       return response.map(toVixIndexPoint);
     },
+    async getVkospiIndex(startDate, endDate) {
+      const response = await postJson<VolatilityIndexResponse[], { start_date: string; end_date: string }>(
+        `${baseUrl}/market-index/vkospi-index`,
+        {
+          start_date: normalizeDate(startDate),
+          end_date: normalizeDate(endDate),
+        },
+      );
+      return response.map(toVolatilityIndexPoint);
+    },
+    async getUsdKrwExchangeRate(startDate, endDate) {
+      const response = await postJson<MarketOhlcResponse[], { start_date: string; end_date: string }>(
+        `${baseUrl}/market-index/usd-krw-exchange-rate`,
+        {
+          start_date: normalizeDate(startDate),
+          end_date: normalizeDate(endDate),
+        },
+      );
+      return response.map(toMarketOhlcPoint);
+    },
     async getFearAndGreedIndex() {
       const response = await getJson<FearAndGreedIndexResponse>(`${baseUrl}/market-index/fear-and-greed-index`);
       return toFearAndGreedIndex(response);
@@ -223,6 +266,26 @@ export function createFastApiStockRepository(baseUrl = '/api'): StockRepository 
         },
       );
       return response.map(toSp500IndexPoint);
+    },
+    async getKospiIndex(startDate, endDate) {
+      const response = await postJson<MarketIndexResponse[], { start_date: string; end_date: string }>(
+        `${baseUrl}/market-index/kospi-index`,
+        {
+          start_date: normalizeDate(startDate),
+          end_date: normalizeDate(endDate),
+        },
+      );
+      return response.map(toMarketIndexPoint);
+    },
+    async getKosdaqIndex(startDate, endDate) {
+      const response = await postJson<MarketIndexResponse[], { start_date: string; end_date: string }>(
+        `${baseUrl}/market-index/kosdaq-index`,
+        {
+          start_date: normalizeDate(startDate),
+          end_date: normalizeDate(endDate),
+        },
+      );
+      return response.map(toMarketIndexPoint);
     },
   };
 }
@@ -334,11 +397,33 @@ function toTreasuryYieldPoint(response: TreasuryYieldResponse): TreasuryYieldPoi
 }
 
 function toSp500IndexPoint(response: Sp500IndexResponse): Sp500IndexPoint {
+  return toMarketOhlcPoint(response);
+}
+
+function toMarketOhlcPoint(response: MarketOhlcResponse): MarketOhlcPoint {
   return {
     date: response.date,
     openPrice: response.open_price,
     highPrice: response.high_price,
     lowPrice: response.low_price,
     closePrice: response.close_price,
+  };
+}
+
+function toVolatilityIndexPoint(response: VolatilityIndexResponse): VolatilityIndexPoint {
+  return {
+    ...toMarketOhlcPoint(response),
+    priceDiff: response.price_diff,
+    priceDiffRate: response.price_diff_rate,
+  };
+}
+
+function toMarketIndexPoint(response: MarketIndexResponse): MarketIndexPoint {
+  return {
+    ...toMarketOhlcPoint(response),
+    priceDiff: response.price_diff,
+    priceDiffRate: response.price_diff_rate,
+    volume: response.volume,
+    tradingValue: response.trading_value,
   };
 }

@@ -338,3 +338,235 @@ test('getSp500Index posts the selected date range to the market index API', asyn
     globalThis.fetch = originalFetch;
   }
 });
+
+test('getVkospiIndex maps OHLC values plus change fields from the market index API', async () => {
+  const originalFetch = globalThis.fetch;
+  const requests: Array<{ url: string; body: unknown }> = [];
+  globalThis.fetch = async (input, init) => {
+    requests.push({
+      url: String(input),
+      body: JSON.parse(String(init?.body)),
+    });
+    return new Response(
+      JSON.stringify([
+        {
+          date: '20260610',
+          open_price: 32.4,
+          high_price: 34.1,
+          low_price: 31.8,
+          close_price: 33.9,
+          price_diff: 1.2,
+          price_diff_rate: 3.67,
+        },
+      ]),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  };
+
+  try {
+    const repository = createFastApiStockRepository('/api');
+
+    const vkospi = await repository.getVkospiIndex('2026-05-10', '2026-06-10');
+
+    assert.deepEqual(requests, [
+      {
+        url: '/api/market-index/vkospi-index',
+        body: {
+          start_date: '20260510',
+          end_date: '20260610',
+        },
+      },
+    ]);
+    assert.deepEqual(vkospi, [
+      {
+        date: '20260610',
+        openPrice: 32.4,
+        highPrice: 34.1,
+        lowPrice: 31.8,
+        closePrice: 33.9,
+        priceDiff: 1.2,
+        priceDiffRate: 3.67,
+      },
+    ]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('getUsdKrwExchangeRate maps OHLC values from the market index API', async () => {
+  const originalFetch = globalThis.fetch;
+  const requests: Array<{ url: string; body: unknown }> = [];
+  globalThis.fetch = async (input, init) => {
+    requests.push({
+      url: String(input),
+      body: JSON.parse(String(init?.body)),
+    });
+    return new Response(
+      JSON.stringify([
+        {
+          date: '20260610',
+          open_price: 1382.5,
+          high_price: 1388.1,
+          low_price: 1379.4,
+          close_price: 1385.2,
+        },
+      ]),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  };
+
+  try {
+    const repository = createFastApiStockRepository('/api');
+
+    const exchangeRate = await repository.getUsdKrwExchangeRate('2026-05-10', '2026-06-10');
+
+    assert.deepEqual(requests, [
+      {
+        url: '/api/market-index/usd-krw-exchange-rate',
+        body: {
+          start_date: '20260510',
+          end_date: '20260610',
+        },
+      },
+    ]);
+    assert.deepEqual(exchangeRate, [
+      {
+        date: '20260610',
+        openPrice: 1382.5,
+        highPrice: 1388.1,
+        lowPrice: 1379.4,
+        closePrice: 1385.2,
+      },
+    ]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('getKospiIndex maps OHLC, change, volume, and trading value from the market index API', async () => {
+  const originalFetch = globalThis.fetch;
+  const requests: Array<{ url: string; body: unknown }> = [];
+  globalThis.fetch = async (input, init) => {
+    requests.push({
+      url: String(input),
+      body: JSON.parse(String(init?.body)),
+    });
+    return new Response(
+      JSON.stringify([
+        {
+          date: '20260610',
+          open_price: 2840.1,
+          high_price: 2862.3,
+          low_price: 2833.8,
+          close_price: 2858.2,
+          price_diff: 18.1,
+          price_diff_rate: 0.64,
+          volume: 551000,
+          trading_value: 10420000,
+        },
+      ]),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  };
+
+  try {
+    const repository = createFastApiStockRepository('/api');
+
+    const kospi = await repository.getKospiIndex('2026-05-10', '2026-06-10');
+
+    assert.deepEqual(requests, [
+      {
+        url: '/api/market-index/kospi-index',
+        body: {
+          start_date: '20260510',
+          end_date: '20260610',
+        },
+      },
+    ]);
+    assert.deepEqual(kospi, [
+      {
+        date: '20260610',
+        openPrice: 2840.1,
+        highPrice: 2862.3,
+        lowPrice: 2833.8,
+        closePrice: 2858.2,
+        priceDiff: 18.1,
+        priceDiffRate: 0.64,
+        volume: 551000,
+        tradingValue: 10420000,
+      },
+    ]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('getKosdaqIndex maps OHLC, change, volume, and trading value from the market index API', async () => {
+  const originalFetch = globalThis.fetch;
+  const requests: Array<{ url: string; body: unknown }> = [];
+  globalThis.fetch = async (input, init) => {
+    requests.push({
+      url: String(input),
+      body: JSON.parse(String(init?.body)),
+    });
+    return new Response(
+      JSON.stringify([
+        {
+          date: '20260610',
+          open_price: 842.1,
+          high_price: 848.6,
+          low_price: 838.4,
+          close_price: 846.8,
+          price_diff: -2.4,
+          price_diff_rate: -0.28,
+          volume: 901000,
+          trading_value: 8200000,
+        },
+      ]),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  };
+
+  try {
+    const repository = createFastApiStockRepository('/api');
+
+    const kosdaq = await repository.getKosdaqIndex('2026-05-10', '2026-06-10');
+
+    assert.deepEqual(requests, [
+      {
+        url: '/api/market-index/kosdaq-index',
+        body: {
+          start_date: '20260510',
+          end_date: '20260610',
+        },
+      },
+    ]);
+    assert.deepEqual(kosdaq, [
+      {
+        date: '20260610',
+        openPrice: 842.1,
+        highPrice: 848.6,
+        lowPrice: 838.4,
+        closePrice: 846.8,
+        priceDiff: -2.4,
+        priceDiffRate: -0.28,
+        volume: 901000,
+        tradingValue: 8200000,
+      },
+    ]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

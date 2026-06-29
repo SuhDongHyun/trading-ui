@@ -14,7 +14,14 @@ export function filterStockOptions(stocks: StockMetaInfo[], input: string): Stoc
 }
 
 export function resolveStockSearchInput(stocks: StockMetaInfo[], input: string): string {
+  return resolveStockSearchSelection(stocks, input).code;
+}
+
+export function resolveStockSearchSelection(stocks: StockMetaInfo[], input: string): { code: string; displayInput: string } {
   const keyword = input.trim();
   const selectedStock = stocks.find((stock) => stock.name === keyword || stock.code === keyword);
-  return selectedStock?.code ?? keyword;
+  return {
+    code: selectedStock?.code ?? keyword,
+    displayInput: selectedStock?.name ?? keyword,
+  };
 }
