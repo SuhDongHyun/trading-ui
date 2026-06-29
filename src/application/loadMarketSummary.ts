@@ -11,9 +11,23 @@ export async function loadMarketSummary(
 ): Promise<MarketSummaryData> {
   const { startDate, endDate } = rangeOrToday instanceof Date ? createDefaultMarketSummaryDateRange(rangeOrToday) : rangeOrToday;
 
-  const [fearAndGreed, vix, korea10YearTreasuryYield, us10YearTreasuryYield, sp500] = await Promise.all([
+  const [
+    fearAndGreed,
+    vix,
+    vkospi,
+    usdKrwExchangeRate,
+    kospi,
+    kosdaq,
+    korea10YearTreasuryYield,
+    us10YearTreasuryYield,
+    sp500,
+  ] = await Promise.all([
     repository.getFearAndGreedIndex(),
     repository.getVixIndex(startDate, endDate),
+    repository.getVkospiIndex(startDate, endDate),
+    repository.getUsdKrwExchangeRate(startDate, endDate),
+    repository.getKospiIndex(startDate, endDate),
+    repository.getKosdaqIndex(startDate, endDate),
     repository.getKorea10YearTreasuryYield(startDate, endDate),
     repository.getUs10YearTreasuryYield(startDate, endDate),
     repository.getSp500Index(startDate, endDate),
@@ -24,6 +38,10 @@ export async function loadMarketSummary(
     endDate,
     fearAndGreed,
     vix,
+    vkospi,
+    usdKrwExchangeRate,
+    kospi,
+    kosdaq,
     korea10YearTreasuryYield,
     us10YearTreasuryYield,
     sp500,
