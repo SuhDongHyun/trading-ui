@@ -1,6 +1,5 @@
 import { useState, type PointerEvent } from 'react';
 import {
-  findNearestDataIndex,
   findPriceExtremes,
   createPaddedValueAxis,
   getPriceChangeTone,
@@ -8,6 +7,7 @@ import {
   type MovingAverageSeries,
   type PriceExtreme,
 } from '../../domain/stock';
+import { findNearestSvgChartPointerIndex, placeTooltipAwayFromPointer, shouldClearTooltipOnPointerLeave } from '../chartTooltipInteraction';
 import { formatDateLabel, formatNumber } from '../format';
 
 type PriceChartProps = {
@@ -48,8 +48,14 @@ export function PriceChart({ prices, currentPrice, priceDiffRate, movingAverages
   const chartWidth = WIDTH - PADDING.left - PADDING.right;
 
   function handlePointerMove(event: PointerEvent<SVGSVGElement>) {
-    const point = toSvgPoint(event, WIDTH, HEIGHT);
-    setHoverIndex(findNearestDataIndex(point.x, prices.length, PADDING.left, chartWidth));
+    const bounds = event.currentTarget.getBoundingClientRect();
+    setHoverIndex(findNearestSvgChartPointerIndex(event.clientX, bounds, WIDTH, prices.length, PADDING.left, chartWidth));
+  }
+
+  function handlePointerLeave(event: PointerEvent<SVGSVGElement>) {
+    if (shouldClearTooltipOnPointerLeave(event.pointerType)) {
+      setHoverIndex(null);
+    }
   }
 
   return (
@@ -76,8 +82,9 @@ export function PriceChart({ prices, currentPrice, priceDiffRate, movingAverages
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         role="img"
         aria-label="가격 차트"
+        onPointerDown={handlePointerMove}
         onPointerMove={handlePointerMove}
-        onPointerLeave={() => setHoverIndex(null)}
+        onPointerLeave={handlePointerLeave}
       >
         <Grid width={WIDTH} height={HEIGHT} padding={PADDING} />
         <PriceAxis ticks={ticks} scale={scale} />
@@ -266,7 +273,7 @@ function PriceTooltip({
     })
     .filter(Boolean);
   const tooltipHeight = 90 + averages.length * 16;
-  const tooltipX = clamp(x + 14, PADDING.left, WIDTH - PADDING.right - tooltipWidth);
+  const tooltipX = placeTooltipAwayFromPointer(x, tooltipWidth, WIDTH, PADDING.left, PADDING.right, 14);
   const tooltipY = clamp(y - tooltipHeight / 2, PADDING.top, HEIGHT - PADDING.bottom - tooltipHeight);
 
   return (
@@ -307,12 +314,4 @@ function createScale(values: number[], height: number, top: number, bottom: numb
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
-}
-
-function toSvgPoint(event: PointerEvent<SVGSVGElement>, width: number, height: number) {
-  const rect = event.currentTarget.getBoundingClientRect();
-  return {
-    x: ((event.clientX - rect.left) / rect.width) * width,
-    y: ((event.clientY - rect.top) / rect.height) * height,
-  };
 }

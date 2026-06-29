@@ -11,6 +11,7 @@ import {
   type TreasuryYieldPoint,
   type VolatilityIndexPoint,
 } from '../../domain/stock';
+import { findNearestChartPointerIndex, shouldClearTooltipOnPointerLeave } from '../chartTooltipInteraction';
 import { formatCompact, formatDateLabel, formatNumber, formatSignedNumber } from '../format';
 import { FearGreedGauge } from './FearGreedGauge';
 
@@ -224,8 +225,12 @@ function MarketLineChart<TPoint extends { date: string }>({
   const hoveredPoint = hoverIndex === null ? null : points[hoverIndex];
   const handlePointerMove = (event: PointerEvent<SVGRectElement>) => {
     const bounds = event.currentTarget.getBoundingClientRect();
-    const ratio = clamp((event.clientX - bounds.left) / bounds.width, 0, 1);
-    setHoverIndex(Math.round(ratio * Math.max(points.length - 1, 0)));
+    setHoverIndex(findNearestChartPointerIndex(event.clientX, bounds, points.length));
+  };
+  const handlePointerLeave = (event: PointerEvent<SVGRectElement>) => {
+    if (shouldClearTooltipOnPointerLeave(event.pointerType)) {
+      setHoverIndex(null);
+    }
   };
 
   return (
@@ -261,8 +266,9 @@ function MarketLineChart<TPoint extends { date: string }>({
           width={LINE_WIDTH - LINE_PADDING.left - LINE_PADDING.right}
           height={LINE_HEIGHT - LINE_PADDING.top - LINE_PADDING.bottom}
           fill="transparent"
+          onPointerDown={handlePointerMove}
           onPointerMove={handlePointerMove}
-          onPointerLeave={() => setHoverIndex(null)}
+          onPointerLeave={handlePointerLeave}
         />
         {hoveredPoint ? (
           <SummaryValueTooltip
@@ -327,8 +333,12 @@ function MarketIndexVolumeChart({
   const hoveredPoint = hoverIndex === null ? null : points[hoverIndex];
   const handlePointerMove = (event: PointerEvent<SVGRectElement>) => {
     const bounds = event.currentTarget.getBoundingClientRect();
-    const ratio = clamp((event.clientX - bounds.left) / bounds.width, 0, 1);
-    setHoverIndex(Math.round(ratio * Math.max(points.length - 1, 0)));
+    setHoverIndex(findNearestChartPointerIndex(event.clientX, bounds, points.length));
+  };
+  const handlePointerLeave = (event: PointerEvent<SVGRectElement>) => {
+    if (shouldClearTooltipOnPointerLeave(event.pointerType)) {
+      setHoverIndex(null);
+    }
   };
 
   return (
@@ -389,8 +399,9 @@ function MarketIndexVolumeChart({
           width={chartRight - chartLeft}
           height={chartBottom - chartTop}
           fill="transparent"
+          onPointerDown={handlePointerMove}
           onPointerMove={handlePointerMove}
-          onPointerLeave={() => setHoverIndex(null)}
+          onPointerLeave={handlePointerLeave}
         />
         {hoveredPoint ? (
           <SummaryValueTooltip
@@ -452,8 +463,12 @@ function MarketCandlestickChart({
   const hoveredPoint = hoverIndex === null ? null : points[hoverIndex];
   const handlePointerMove = (event: PointerEvent<SVGRectElement>) => {
     const bounds = event.currentTarget.getBoundingClientRect();
-    const ratio = clamp((event.clientX - bounds.left) / bounds.width, 0, 1);
-    setHoverIndex(Math.round(ratio * Math.max(points.length - 1, 0)));
+    setHoverIndex(findNearestChartPointerIndex(event.clientX, bounds, points.length));
+  };
+  const handlePointerLeave = (event: PointerEvent<SVGRectElement>) => {
+    if (shouldClearTooltipOnPointerLeave(event.pointerType)) {
+      setHoverIndex(null);
+    }
   };
 
   return (
@@ -497,8 +512,9 @@ function MarketCandlestickChart({
           width={CANDLE_WIDTH - CANDLE_PADDING.left - CANDLE_PADDING.right}
           height={CANDLE_HEIGHT - CANDLE_PADDING.top - CANDLE_PADDING.bottom}
           fill="transparent"
+          onPointerDown={handlePointerMove}
           onPointerMove={handlePointerMove}
-          onPointerLeave={() => setHoverIndex(null)}
+          onPointerLeave={handlePointerLeave}
         />
         {hoveredPoint ? (
           <SummaryValueTooltip
@@ -554,8 +570,12 @@ function TreasuryYieldChart({ korea, us }: { korea: TreasuryYieldPoint[]; us: Tr
     : LINE_PADDING.top;
   const handlePointerMove = (event: PointerEvent<SVGRectElement>) => {
     const bounds = event.currentTarget.getBoundingClientRect();
-    const ratio = clamp((event.clientX - bounds.left) / bounds.width, 0, 1);
-    setHoverIndex(Math.round(ratio * Math.max(dates.length - 1, 0)));
+    setHoverIndex(findNearestChartPointerIndex(event.clientX, bounds, dates.length));
+  };
+  const handlePointerLeave = (event: PointerEvent<SVGRectElement>) => {
+    if (shouldClearTooltipOnPointerLeave(event.pointerType)) {
+      setHoverIndex(null);
+    }
   };
 
   return (
@@ -601,8 +621,9 @@ function TreasuryYieldChart({ korea, us }: { korea: TreasuryYieldPoint[]; us: Tr
           width={LINE_WIDTH - LINE_PADDING.left - LINE_PADDING.right}
           height={LINE_HEIGHT - LINE_PADDING.top - LINE_PADDING.bottom}
           fill="transparent"
+          onPointerDown={handlePointerMove}
           onPointerMove={handlePointerMove}
-          onPointerLeave={() => setHoverIndex(null)}
+          onPointerLeave={handlePointerLeave}
         />
         {hoveredDate ? (
           <SummaryValueTooltip
@@ -652,8 +673,12 @@ function Sp500CandlestickChart({ points, xAxisDates }: { points: Sp500IndexPoint
   const hoveredPoint = hoverIndex === null ? null : points[hoverIndex];
   const handlePointerMove = (event: PointerEvent<SVGRectElement>) => {
     const bounds = event.currentTarget.getBoundingClientRect();
-    const ratio = clamp((event.clientX - bounds.left) / bounds.width, 0, 1);
-    setHoverIndex(Math.round(ratio * Math.max(points.length - 1, 0)));
+    setHoverIndex(findNearestChartPointerIndex(event.clientX, bounds, points.length));
+  };
+  const handlePointerLeave = (event: PointerEvent<SVGRectElement>) => {
+    if (shouldClearTooltipOnPointerLeave(event.pointerType)) {
+      setHoverIndex(null);
+    }
   };
 
   return (
@@ -697,8 +722,9 @@ function Sp500CandlestickChart({ points, xAxisDates }: { points: Sp500IndexPoint
           width={CANDLE_WIDTH - CANDLE_PADDING.left - CANDLE_PADDING.right}
           height={CANDLE_HEIGHT - CANDLE_PADDING.top - CANDLE_PADDING.bottom}
           fill="transparent"
+          onPointerDown={handlePointerMove}
           onPointerMove={handlePointerMove}
-          onPointerLeave={() => setHoverIndex(null)}
+          onPointerLeave={handlePointerLeave}
         />
         {hoveredPoint ? (
           <SummaryValueTooltip

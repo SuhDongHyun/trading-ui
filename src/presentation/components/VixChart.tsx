@@ -2,9 +2,9 @@ import { useState, type PointerEvent } from 'react';
 import {
   createDateAxisTicks,
   createPaddedValueAxis,
-  findNearestDataIndex,
   type VixIndexPoint,
 } from '../../domain/stock';
+import { findNearestSvgChartPointerIndex, shouldClearTooltipOnPointerLeave } from '../chartTooltipInteraction';
 import { formatDateLabel } from '../format';
 
 type VixChartProps = {
@@ -50,8 +50,14 @@ export function VixChart({ points, isLoading, showDateAxis = false }: VixChartPr
   const dateTicks = createDateAxisTicks(data.map((point) => point.date), 6);
 
   function handlePointerMove(event: PointerEvent<SVGSVGElement>) {
-    const point = toSvgPoint(event, WIDTH, HEIGHT);
-    setHoverIndex(findNearestDataIndex(point.x, data.length, PADDING.left, WIDTH - PADDING.left - PADDING.right));
+    const bounds = event.currentTarget.getBoundingClientRect();
+    setHoverIndex(findNearestSvgChartPointerIndex(event.clientX, bounds, WIDTH, data.length, PADDING.left, WIDTH - PADDING.left - PADDING.right));
+  }
+
+  function handlePointerLeave(event: PointerEvent<SVGSVGElement>) {
+    if (shouldClearTooltipOnPointerLeave(event.pointerType)) {
+      setHoverIndex(null);
+    }
   }
 
   return (
@@ -69,8 +75,9 @@ export function VixChart({ points, isLoading, showDateAxis = false }: VixChartPr
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
           role="img"
           aria-label="VIX 지표 차트"
+          onPointerDown={handlePointerMove}
           onPointerMove={handlePointerMove}
-          onPointerLeave={() => setHoverIndex(null)}
+          onPointerLeave={handlePointerLeave}
         >
           {[0, 1, 2, 3, 4].map((line) => {
             const y = PADDING.top + (line / 4) * (HEIGHT - PADDING.top - PADDING.bottom);
@@ -145,12 +152,4 @@ function VixTooltip({ point, x, y }: { point: VixIndexPoint; x: number; y: numbe
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
-}
-
-function toSvgPoint(event: PointerEvent<SVGSVGElement>, width: number, height: number) {
-  const rect = event.currentTarget.getBoundingClientRect();
-  return {
-    x: ((event.clientX - rect.left) / rect.width) * width,
-    y: ((event.clientY - rect.top) / rect.height) * height,
-  };
 }
