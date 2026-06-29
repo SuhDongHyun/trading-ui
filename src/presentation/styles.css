@@ -523,6 +523,9 @@ button {
   display: block;
   width: 100%;
   height: auto;
+  -webkit-touch-callout: none;
+  touch-action: none;
+  user-select: none;
 }
 
 .price-chart {
@@ -538,6 +541,9 @@ button {
   width: 100%;
   min-height: 260px;
   height: auto;
+  -webkit-touch-callout: none;
+  touch-action: none;
+  user-select: none;
 }
 
 .axis-label {
@@ -798,6 +804,9 @@ button {
   display: block;
   width: 100%;
   height: auto;
+  -webkit-touch-callout: none;
+  touch-action: none;
+  user-select: none;
 }
 
 .summary-line-chart {
