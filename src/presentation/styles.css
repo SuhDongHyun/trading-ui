@@ -524,7 +524,7 @@ button {
   width: 100%;
   height: auto;
   -webkit-touch-callout: none;
-  touch-action: none;
+  touch-action: pan-y;
   user-select: none;
 }
 
@@ -542,7 +542,7 @@ button {
   min-height: 260px;
   height: auto;
   -webkit-touch-callout: none;
-  touch-action: none;
+  touch-action: pan-y;
   user-select: none;
 }
 
@@ -805,7 +805,7 @@ button {
   width: 100%;
   height: auto;
   -webkit-touch-callout: none;
-  touch-action: none;
+  touch-action: pan-y;
   user-select: none;
 }
 
