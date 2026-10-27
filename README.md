@@ -31,7 +31,19 @@ npm install
 
 ### 2. API 서버 실행
 
-프론트엔드는 브라우저에서 `/api`로 요청합니다. Vite 개발 서버는 이 요청을 `http://localhost:9999`로 프록시합니다.
+프론트엔드는 브라우저에서 `/api`로 요청합니다. Vite 개발/preview 서버는 이 요청을 `API_PROXY_TARGET`으로 프록시합니다.
+
+백엔드 주소는 `.env`에서 설정합니다. `.env`는 git에 커밋되지 않으므로 `.env.example`을 복사해 만듭니다. `API_PROXY_TARGET` 값이 없으면 `http://localhost:9999`를 사용합니다.
+
+```bash
+cp .env.example .env
+```
+
+배포된 백엔드를 쓰려면 다음과 같이 지정합니다.
+
+```bash
+API_PROXY_TARGET=https://trading-api-gold.vercel.app
+```
 
 필요한 백엔드 endpoint:
 
