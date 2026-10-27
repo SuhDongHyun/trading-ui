@@ -26,7 +26,6 @@ type ApiStockQuery = {
   code: string;
   start_date: string;
   end_date: string;
-  period: string;
   adjusted_price: boolean;
 };
 
@@ -305,7 +304,6 @@ function toApiStockQuery(query: StockQuery): ApiStockQuery {
     code: query.code,
     start_date: normalizeDate(query.startDate),
     end_date: normalizeDate(query.endDate),
-    period: query.period,
     adjusted_price: query.adjustedPrice,
   };
 }
