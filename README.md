@@ -1,6 +1,6 @@
 # trading-ui
 
-React, TypeScript, Vite 기반의 주식 차트 조회 UI입니다. 로컬 FastAPI 서버의 주식 시세 API를 호출해 현재가, 캔들 차트, 이동평균, RSI/Signal, MACD 지표를 한 화면에 표시합니다.
+React, TypeScript, Vite 기반의 시장 요약 및 주식·코인 조회 UI입니다. FastAPI 서버에서 시장 지표와 시세 데이터를 불러와 Summary, 주식 검색, 코인 검색 페이지에 표시합니다.
 
 ## 주요 기능
 
@@ -10,6 +10,9 @@ React, TypeScript, Vite 기반의 주식 차트 조회 UI입니다. 로컬 FastA
 - SVG 기반 캔들 차트와 이동평균선 렌더링
 - RSI/Signal, MACD/Signal 보조지표 렌더링
 - 지표 설정 모달에서 이동평균 window, RSI window, Signal EMA, MACD EMA 값 변경
+- KRW/BTC/USDT 마켓별 코인 목록, 한글·영문·심볼·초성 검색, 정렬과 유의·주의 필터
+- 선택한 코인의 현재가, 등락, 거래 통계, 52주 범위 및 최근 체결 시각 표시
+- `#KRW-BTC` 형식의 코인 마켓 해시로 코인 검색 페이지 진입 및 선택 상태 공유
 - API 오류와 빈 데이터 상태를 화면 안에서 표시
 
 ## 기술 스택
@@ -56,6 +59,9 @@ Vercel 배포에서는 `middleware.ts`가 `/api` 요청을 `API_PROXY_TARGET`으
 - `POST /stock_quote/indicator/rsi-signal`
 - `POST /stock_quote/indicator/macd`
 - `POST /stock_quote/indicator/macd-signal`
+- `POST /bitcoin/trading-pairs` (`is_details: true`)
+- `POST /bitcoin/ticker/quote` (`quote_currencies: ["KRW", "BTC", "USDT"]`)
+- `POST /bitcoin/ticker` (`markets: [선택한 마켓]`)
 
 ### 3. 개발 서버 실행
 
@@ -97,19 +103,27 @@ npm test
 src/
   application/
     loadStockChart.ts
+    loadBitcoinMarket.ts
+    loadBitcoinTicker.ts
   domain/
     stock.ts
+    bitcoin.ts
+    bitcoinSearch.ts
   infrastructure/
     fastApiStockRepository.ts
+    fastApiBitcoinRepository.ts
     http.ts
   presentation/
     App.tsx
     components/
     hooks/
     format.ts
+    bitcoinFormat.ts
     styles.css
 tests/
   loadStockChart.test.ts
+  loadBitcoinMarket.test.ts
+  bitcoinSearch.test.ts
   stock.test.ts
 middleware.ts
 vite.config.ts
@@ -119,12 +133,12 @@ vite.config.ts
 
 이 프로젝트는 UI에서도 계층을 분리합니다.
 
-- `domain`: 주식 조회 조건, quote, 가격, 지표 타입과 차트 계산 유틸리티
-- `application`: `loadStockChart` 유스케이스로 quote와 차트 시리즈를 함께 로드
-- `infrastructure`: FastAPI endpoint를 `StockRepository` 인터페이스에 맞게 변환
-- `presentation`: React hook, 화면 컴포넌트, SVG 차트, 스타일
+- `domain`: 주식·코인 조회 타입, 검색·정렬과 차트 계산 유틸리티
+- `application`: 주식 차트 데이터, 코인 목록·시세를 함께 불러오는 유스케이스
+- `infrastructure`: FastAPI endpoint 응답을 repository 인터페이스에 맞게 변환
+- `presentation`: React hook, 화면 컴포넌트, SVG 차트, 스타일과 표시 형식
 
-React 컴포넌트는 `fetch`를 직접 호출하지 않습니다. 화면은 `useStockChart`를 사용하고, hook은 application layer를 통해 repository에 접근합니다.
+React 컴포넌트는 `fetch`를 직접 호출하지 않습니다. 화면은 `useStockChart` 또는 `useBitcoinSearch`를 사용하고, hook은 application layer를 통해 repository에 접근합니다.
 
 ## API 요청 형식
 
