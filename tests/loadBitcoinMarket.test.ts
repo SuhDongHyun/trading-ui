@@ -29,6 +29,10 @@ test('loadBitcoinMarket requests detailed pairs and all quote tickers, then join
     async getTicker() {
       return [];
     },
+    async getCandles() { return []; },
+    async getOrderbookInstruments() { return []; },
+    async getOrderbook() { return []; },
+    async getTrades() { return []; },
   };
 
   const coins = await loadBitcoinMarket(repository);
@@ -55,6 +59,10 @@ test('loadBitcoinTicker requests the selected market and returns its ticker', as
       calls.push(markets);
       return [{ ...ticker, market: 'KRW-BTC' }, ticker];
     },
+    async getCandles() { return []; },
+    async getOrderbookInstruments() { return []; },
+    async getOrderbook() { return []; },
+    async getTrades() { return []; },
   };
 
   assert.deepEqual(await loadBitcoinTicker(repository, 'BTC-ETH'), ticker);
@@ -66,6 +74,10 @@ test('loadBitcoinTicker reports when the selected market is missing from the res
     async getTradingPairs() { return []; },
     async getQuoteTickers() { return []; },
     async getTicker() { return []; },
+    async getCandles() { return []; },
+    async getOrderbookInstruments() { return []; },
+    async getOrderbook() { return []; },
+    async getTrades() { return []; },
   };
 
   await assert.rejects(loadBitcoinTicker(repository, 'KRW-BTC'), /선택한 코인의 시세 정보를 찾을 수 없습니다/);

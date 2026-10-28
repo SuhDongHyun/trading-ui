@@ -50,8 +50,62 @@ export type BitcoinCoin = BitcoinTradingPair & BitcoinTicker & {
   chosung: string;
 };
 
+export type BitcoinCandlePeriod = 'm15' | 'm60' | 'D' | 'W' | 'M';
+
+export type BitcoinCandle = {
+  market: string;
+  dateTimeKst: string;
+  openingPrice: number;
+  highPrice: number;
+  lowPrice: number;
+  tradePrice: number;
+  accumulatedTradeVolume: number;
+};
+
+export type BitcoinOrderbookInstrument = {
+  market: string;
+  quoteCurrency: string;
+  tickSize: number;
+  supportedLevels: string[];
+};
+
+export type BitcoinOrderbookUnit = {
+  askPrice: number;
+  askSize: number;
+  bidPrice: number;
+  bidSize: number;
+};
+
+export type BitcoinOrderbook = {
+  market: string;
+  timestamp: number;
+  totalAskSize: number;
+  totalBidSize: number;
+  level: number;
+  units: BitcoinOrderbookUnit[];
+};
+
+export type BitcoinTrade = {
+  market: string;
+  tradeDateUtc: string;
+  tradeTimeUtc: string;
+  tradeDateKst?: string;
+  tradeTimeKst?: string;
+  timestamp: number;
+  tradePrice: number;
+  tradeVolume: number;
+  previousClosingPrice: number;
+  changePrice: number;
+  side: 'ASK' | 'BID';
+  sequentialId: number;
+};
+
 export type BitcoinRepository = {
   getTradingPairs(isDetails: boolean): Promise<BitcoinTradingPair[]>;
   getQuoteTickers(quoteCurrencies: BitcoinQuote[]): Promise<BitcoinTicker[]>;
   getTicker(markets: string[]): Promise<BitcoinTicker[]>;
+  getCandles(market: string, period: BitcoinCandlePeriod, count: number, signal?: AbortSignal): Promise<BitcoinCandle[]>;
+  getOrderbookInstruments(markets: string[], signal?: AbortSignal): Promise<BitcoinOrderbookInstrument[]>;
+  getOrderbook(market: string, level: string, signal?: AbortSignal): Promise<BitcoinOrderbook[]>;
+  getTrades(market: string, count: number, signal?: AbortSignal): Promise<BitcoinTrade[]>;
 };

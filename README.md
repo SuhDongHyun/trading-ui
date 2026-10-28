@@ -12,6 +12,8 @@ React, TypeScript, Vite 기반의 시장 요약 및 주식·코인 조회 UI입�
 - 지표 설정 모달에서 이동평균 window, RSI window, Signal EMA, MACD EMA 값 변경
 - KRW/BTC/USDT 마켓별 코인 목록, 한글·영문·심볼·초성 검색, 정렬과 유의·주의 필터
 - 선택한 코인의 현재가, 등락, 거래 통계, 52주 범위 및 최근 체결 시각 표시
+- 선택한 코인의 15분·1시간·일·주·월 캔들 차트, 모아보기 호가와 최근 체결 상세 표시
+- 차트 기간 통계와 이동평균선, 호가 잔량 비율, 체결 구분 필터 제공
 - `#KRW-BTC` 형식의 코인 마켓 해시로 코인 검색 페이지 진입 및 선택 상태 공유
 - API 오류와 빈 데이터 상태를 화면 안에서 표시
 
@@ -62,6 +64,10 @@ Vercel 배포에서는 `middleware.ts`가 `/api` 요청을 `API_PROXY_TARGET`으
 - `POST /bitcoin/trading-pairs` (`is_details: true`)
 - `POST /bitcoin/ticker/quote` (`quote_currencies: ["KRW", "BTC", "USDT"]`)
 - `POST /bitcoin/ticker` (`markets: [선택한 마켓]`)
+- `POST /bitcoin/candles/minutes/15`, `/bitcoin/candles/minutes/60`, `/bitcoin/candles/days`, `/bitcoin/candles/weeks`, `/bitcoin/candles/months`
+- `POST /bitcoin/orderbook/instruments` (`markets: [선택한 마켓]`)
+- `POST /bitcoin/orderbook` (`markets: [선택한 마켓]`, `level`)
+- `POST /bitcoin/trades` (`market: 선택한 마켓`, `count: 30`)
 
 ### 3. 개발 서버 실행
 
@@ -103,11 +109,13 @@ npm test
 src/
   application/
     loadStockChart.ts
+    loadBitcoinDetails.ts
     loadBitcoinMarket.ts
     loadBitcoinTicker.ts
   domain/
     stock.ts
     bitcoin.ts
+    bitcoinDetail.ts
     bitcoinSearch.ts
   infrastructure/
     fastApiStockRepository.ts
@@ -122,7 +130,10 @@ src/
     styles.css
 tests/
   loadStockChart.test.ts
+  loadBitcoinDetails.test.ts
   loadBitcoinMarket.test.ts
+  bitcoinDetail.test.ts
+  bitcoinDetailRepository.test.ts
   bitcoinSearch.test.ts
   stock.test.ts
 middleware.ts
