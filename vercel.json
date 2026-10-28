@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://trading-api-gold.vercel.app/:path*"
+      "destination": "http://168.107.38.132:9999/:path*"
     }
   ]
 }
