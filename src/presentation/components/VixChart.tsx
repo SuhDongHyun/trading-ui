@@ -10,6 +10,7 @@ import {
   shouldClearTooltipOnPointerLeave,
 } from '../chartTooltipInteraction';
 import { formatDateLabel } from '../format';
+import { chartPalette } from '../chartPalette';
 
 type VixChartProps = {
   points: VixIndexPoint[] | undefined;
@@ -93,7 +94,7 @@ export function VixChart({ points, isLoading, showDateAxis = false }: VixChartPr
         >
           {[0, 1, 2, 3, 4].map((line) => {
             const y = PADDING.top + (line / 4) * (HEIGHT - PADDING.top - PADDING.bottom);
-            return <line key={line} x1="0" x2={WIDTH} y1={y} y2={y} stroke="#eeeeee" strokeWidth="1" />;
+            return <line key={line} x1="0" x2={WIDTH} y1={y} y2={y} stroke={chartPalette.border} strokeWidth="1" />;
           })}
           {axis.ticks.map((tick) => (
             <text key={tick} x={WIDTH - PADDING.right + 16} y={scale(tick) + 4} className="axis-label indicator-axis-label">
@@ -102,17 +103,17 @@ export function VixChart({ points, isLoading, showDateAxis = false }: VixChartPr
           ))}
           <polyline
             fill="none"
-            stroke="#1f9aa8"
+            stroke={chartPalette.chartTeal}
             strokeWidth="2.5"
             points={data.map((point, index) => `${xFor(index)},${scale(point.value)}`).join(' ')}
           />
           {data.map((point, index) => (
-            <circle key={`${point.date}-${index}`} cx={xFor(index)} cy={scale(point.value)} r="3" fill="#1f9aa8" />
+            <circle key={`${point.date}-${index}`} cx={xFor(index)} cy={scale(point.value)} r="3" fill={chartPalette.chartTeal} />
           ))}
           {latest ? (
             <g transform={`translate(${WIDTH - PADDING.right + 12} ${clamp(scale(latest.value) - 18, PADDING.top, HEIGHT - PADDING.bottom - 36)})`}>
-              <path d="M0 18 L12 0 H76 A5 5 0 0 1 81 5 V31 A5 5 0 0 1 76 36 H12 Z" fill="#1f9aa8" />
-              <text x="22" y="23" fill="#fff" fontSize="16" fontWeight="800">
+              <path d="M0 18 L12 0 H76 A5 5 0 0 1 81 5 V31 A5 5 0 0 1 76 36 H12 Z" fill={chartPalette.chartTeal} />
+              <text x="22" y="23" fill={chartPalette.surface} fontSize="16" fontWeight="600">
                 {latest.value.toFixed(2)}
               </text>
             </g>
@@ -147,14 +148,14 @@ function VixTooltip({ point, x, y }: { point: VixIndexPoint; x: number; y: numbe
 
   return (
     <g className="chart-tooltip">
-      <line x1={x} x2={x} y1={PADDING.top} y2={HEIGHT - PADDING.bottom} stroke="#1f2937" strokeWidth="1" strokeDasharray="3 3" />
-      <circle cx={x} cy={y} r="4" fill="#111827" stroke="#ffffff" strokeWidth="2" />
+      <line x1={x} x2={x} y1={PADDING.top} y2={HEIGHT - PADDING.bottom} stroke={chartPalette.textPrimary} strokeWidth="1" strokeDasharray="3 3" />
+      <circle cx={x} cy={y} r="4" fill={chartPalette.textPrimary} stroke={chartPalette.surface} strokeWidth="2" />
       <g transform={`translate(${tooltipX} ${tooltipY})`}>
-        <rect width={tooltipWidth} height={tooltipHeight} rx="6" fill="#111827" opacity="0.94" />
-        <text x="10" y="22" fill="#ffffff" fontSize="13" fontWeight="800">
+        <rect width={tooltipWidth} height={tooltipHeight} rx="6" fill={chartPalette.textPrimary} opacity="0.96" />
+        <text x="10" y="22" fill={chartPalette.surface} fontSize="13" fontWeight="600">
           {formatDateLabel(point.date)}
         </text>
-        <text x="10" y="44" fill="#d1d5db" fontSize="12">
+        <text x="10" y="44" fill={chartPalette.surfaceMuted} fontSize="12">
           VIX {point.value.toFixed(2)}
         </text>
       </g>

@@ -14,6 +14,7 @@ import {
   shouldClearTooltipOnPointerLeave,
 } from '../chartTooltipInteraction';
 import { formatDateLabel, formatNumber } from '../format';
+import { chartPalette, movingAveragePalette } from '../chartPalette';
 
 type PriceChartProps = {
   prices: DailyPrice[];
@@ -27,8 +28,6 @@ type PriceChartProps = {
 const WIDTH = 900;
 const HEIGHT = 430;
 const PADDING = { top: 32, right: 132, bottom: 44, left: 30 };
-const COLORS = ['#ef4b3d', '#b35dc0', '#5f98c5', '#8cb35d'];
-
 export function PriceChart({ prices, currentPrice, priceDiffRate, movingAverages, windows, onOpenSettings }: PriceChartProps) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
@@ -47,7 +46,7 @@ export function PriceChart({ prices, currentPrice, priceDiffRate, movingAverages
   const candleWidth = Math.max(6, Math.min(20, (WIDTH - PADDING.left - PADDING.right) / prices.length / 1.15));
   const latest = prices.at(-1);
   const priceTone = getPriceChangeTone(priceDiffRate);
-  const quoteColor = priceTone === 'down' ? '#4f7ee8' : '#ef4055';
+  const quoteColor = priceTone === 'down' ? chartPalette.down : chartPalette.up;
   const extremes = findPriceExtremes(prices, currentPrice);
   const hoveredPrice = hoverIndex === null ? null : prices[hoverIndex];
   const chartWidth = WIDTH - PADDING.left - PADDING.right;
@@ -80,7 +79,7 @@ export function PriceChart({ prices, currentPrice, priceDiffRate, movingAverages
             key={window}
             type="button"
             className="legend-button"
-            style={{ color: COLORS[index % COLORS.length] }}
+            style={{ color: movingAveragePalette[index % movingAveragePalette.length] }}
             onClick={onOpenSettings}
           >
             ● {window}
@@ -114,7 +113,7 @@ export function PriceChart({ prices, currentPrice, priceDiffRate, movingAverages
                 x2={x}
                 y1={scale(price.highPrice)}
                 y2={scale(price.lowPrice)}
-                stroke={isUp ? '#ef4055' : '#4f7ee8'}
+                stroke={isUp ? chartPalette.up : chartPalette.down}
                 strokeWidth="2"
               />
               <rect
@@ -122,7 +121,7 @@ export function PriceChart({ prices, currentPrice, priceDiffRate, movingAverages
                 y={bodyTop}
                 width={candleWidth}
                 height={bodyHeight}
-                fill={isUp ? '#ef4055' : '#4f7ee8'}
+                fill={isUp ? chartPalette.up : chartPalette.down}
                 rx="1"
               />
             </g>
@@ -133,7 +132,7 @@ export function PriceChart({ prices, currentPrice, priceDiffRate, movingAverages
           <polyline
             key={series.window}
             fill="none"
-            stroke={COLORS[index % COLORS.length]}
+            stroke={movingAveragePalette[index % movingAveragePalette.length]}
             strokeWidth="2"
             points={series.points
               .map((point) => {
@@ -175,10 +174,10 @@ export function PriceChart({ prices, currentPrice, priceDiffRate, movingAverages
             />
             <g transform={`translate(${WIDTH - PADDING.right + 12} ${scale(currentPrice) - 24})`}>
               <path d="M0 24 L14 0 H96 A6 6 0 0 1 102 6 V42 A6 6 0 0 1 96 48 H14 Z" fill={quoteColor} />
-              <text x="24" y="21" fill="#fff" fontSize="16" fontWeight="800">
+              <text x="24" y="21" fill={chartPalette.surface} fontSize="16" fontWeight="600">
                 {formatNumber(currentPrice)}
               </text>
-              <text x="24" y="39" fill="#fff" fontSize="13">
+              <text x="24" y="39" fill={chartPalette.surface} fontSize="13">
                 {priceDiffRate >= 0 ? '+' : ''}
                 {priceDiffRate.toFixed(2)}%
               </text>
@@ -208,11 +207,11 @@ function Grid({ width, height, padding }: { width: number; height: number; paddi
     <g>
       {lines.map((line) => {
         const y = padding.top + (line / 4) * (height - padding.top - padding.bottom);
-        return <line key={`h-${line}`} x1="0" x2={width} y1={y} y2={y} stroke="#eeeeee" strokeWidth="1" />;
+        return <line key={`h-${line}`} x1="0" x2={width} y1={y} y2={y} stroke={chartPalette.border} strokeWidth="1" />;
       })}
       {[0, 1, 2, 3].map((line) => {
         const x = padding.left + (line / 3) * (width - padding.left - padding.right);
-        return <line key={`v-${line}`} x1={x} x2={x} y1="0" y2={height} stroke="#f0f0f0" strokeWidth="1" />;
+        return <line key={`v-${line}`} x1={x} x2={x} y1="0" y2={height} stroke={chartPalette.surfaceMuted} strokeWidth="1" />;
       })}
     </g>
   );
@@ -242,7 +241,7 @@ function ExtremeMarker({
   y: number;
 }) {
   const isHigh = kind === 'high';
-  const color = isHigh ? '#ef4055' : '#4f7ee8';
+  const color = isHigh ? chartPalette.up : chartPalette.down;
   const labelWidth = 144;
   const labelX = clamp(x + (isHigh ? 10 : -labelWidth - 10), PADDING.left, WIDTH - PADDING.right - labelWidth);
   const labelY = clamp(y + (isHigh ? -42 : 12), PADDING.top + 4, HEIGHT - PADDING.bottom - 42);
@@ -250,14 +249,14 @@ function ExtremeMarker({
 
   return (
     <g>
-      <circle cx={x} cy={y} r="4" fill={color} stroke="#ffffff" strokeWidth="2" />
+      <circle cx={x} cy={y} r="4" fill={color} stroke={chartPalette.surface} strokeWidth="2" />
       <line x1={x} x2={labelX + (isHigh ? 0 : labelWidth)} y1={y} y2={labelY + 20} stroke={color} strokeWidth="1.5" />
       <g transform={`translate(${labelX} ${labelY})`}>
-        <rect width={labelWidth} height="40" rx="4" fill="#ffffff" stroke={color} strokeWidth="1.5" />
-        <text x="8" y="16" fill={color} fontSize="13" fontWeight="800">
+        <rect width={labelWidth} height="40" rx="4" fill={chartPalette.surface} stroke={color} strokeWidth="1.5" />
+        <text x="8" y="16" fill={color} fontSize="13" fontWeight="600">
           {isHigh ? '최고' : '최저'} {formatNumber(extreme.value)}
         </text>
-        <text x="8" y="32" fill="#555b64" fontSize="12" fontWeight="700">
+        <text x="8" y="32" fill={chartPalette.textSecondary} fontSize="12" fontWeight="600">
           {formatDateLabel(extreme.date)} / {percent}
         </text>
       </g>
@@ -291,20 +290,20 @@ function PriceTooltip({
 
   return (
     <g className="chart-tooltip">
-      <line x1={x} x2={x} y1={PADDING.top} y2={HEIGHT - PADDING.bottom} stroke="#1f2937" strokeWidth="1" strokeDasharray="3 3" />
-      <circle cx={x} cy={y} r="4" fill="#111827" stroke="#ffffff" strokeWidth="2" />
+      <line x1={x} x2={x} y1={PADDING.top} y2={HEIGHT - PADDING.bottom} stroke={chartPalette.textPrimary} strokeWidth="1" strokeDasharray="3 3" />
+      <circle cx={x} cy={y} r="4" fill={chartPalette.textPrimary} stroke={chartPalette.surface} strokeWidth="2" />
       <g transform={`translate(${tooltipX} ${tooltipY})`}>
-        <rect width={tooltipWidth} height={tooltipHeight} rx="6" fill="#111827" opacity="0.94" />
-        <text x="10" y="20" fill="#ffffff" fontSize="13" fontWeight="800">
+        <rect width={tooltipWidth} height={tooltipHeight} rx="6" fill={chartPalette.textPrimary} opacity="0.96" />
+        <text x="10" y="20" fill={chartPalette.surface} fontSize="13" fontWeight="600">
           {formatDateLabel(price.date)}
         </text>
-        <text x="10" y="40" fill="#d1d5db" fontSize="12">시 {formatNumber(price.openPrice)}</text>
-        <text x="92" y="40" fill="#d1d5db" fontSize="12">고 {formatNumber(price.highPrice)}</text>
-        <text x="10" y="58" fill="#d1d5db" fontSize="12">저 {formatNumber(price.lowPrice)}</text>
-        <text x="92" y="58" fill="#d1d5db" fontSize="12">종 {formatNumber(price.closePrice)}</text>
-        <text x="10" y="78" fill="#d1d5db" fontSize="12">거래량 {formatNumber(price.accumulatedVolume)}</text>
+        <text x="10" y="40" fill={chartPalette.surfaceMuted} fontSize="12">시 {formatNumber(price.openPrice)}</text>
+        <text x="92" y="40" fill={chartPalette.surfaceMuted} fontSize="12">고 {formatNumber(price.highPrice)}</text>
+        <text x="10" y="58" fill={chartPalette.surfaceMuted} fontSize="12">저 {formatNumber(price.lowPrice)}</text>
+        <text x="92" y="58" fill={chartPalette.surfaceMuted} fontSize="12">종 {formatNumber(price.closePrice)}</text>
+        <text x="10" y="78" fill={chartPalette.surfaceMuted} fontSize="12">거래량 {formatNumber(price.accumulatedVolume)}</text>
         {averages.map((average, index) => (
-          <text key={average} x="10" y={98 + index * 16} fill="#d1d5db" fontSize="12">
+          <text key={average} x="10" y={98 + index * 16} fill={chartPalette.surfaceMuted} fontSize="12">
             {average}
           </text>
         ))}

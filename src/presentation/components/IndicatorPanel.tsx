@@ -13,6 +13,8 @@ import {
   shouldClearTooltipOnPointerLeave,
 } from '../chartTooltipInteraction';
 import { formatDateLabel, formatNumber } from '../format';
+import { chartPalette } from '../chartPalette';
+import { getIndicatorValueMarkerLayout } from '../indicatorValueMarker';
 
 type IndicatorPanelProps = {
   title: string;
@@ -56,6 +58,22 @@ export function IndicatorPanel({
   const hoveredPoint = hoverIndex === null ? null : primary[hoverIndex];
   const hoveredSecondary = hoveredPoint ? secondary.find((point) => point.date === hoveredPoint.date) : undefined;
   const dateTicks = createDateAxisTicks(primary.map((point) => point.date), 6);
+  const latestValueText = latest ? formatIndicatorValue(latest.value, mode) : '';
+  const latestMarkerX = WIDTH - PADDING.right + 12;
+  const markerMinY = PADDING.top;
+  const markerMaxY = HEIGHT - PADDING.bottom - VALUE_MARKER_HEIGHT;
+  const axisLabelYs = ticks.map((tick) => scale(tick) + 4);
+  const { width: latestMarkerWidth, y: latestMarkerY, hiddenAxisLabelIndexes } = getIndicatorValueMarkerLayout({
+    valueText: latestValueText,
+    valueY: latest ? scale(latest.value) : markerMinY,
+    axisLabelYs,
+    axisLabelHeight: 18,
+    markerX: latestMarkerX,
+    svgWidth: WIDTH,
+    markerHeight: VALUE_MARKER_HEIGHT,
+    minY: markerMinY,
+    maxY: markerMaxY,
+  });
 
   function handlePointerMove(event: PointerEvent<SVGSVGElement>) {
     if (primary.length === 0) {
@@ -101,9 +119,9 @@ export function IndicatorPanel({
         onPointerCancel={handlePointerEnd}
         onPointerLeave={handlePointerLeave}
       >
-        <line x1="0" x2={WIDTH} y1={PADDING.top} y2={PADDING.top} stroke="#f0f0f0" />
-        <line x1="0" x2={WIDTH} y1={HEIGHT - PADDING.bottom} y2={HEIGHT - PADDING.bottom} stroke="#eeeeee" />
-        <ValueAxis ticks={ticks} scale={scale} mode={mode} />
+        <line x1="0" x2={WIDTH} y1={PADDING.top} y2={PADDING.top} stroke={chartPalette.surfaceMuted} />
+        <line x1="0" x2={WIDTH} y1={HEIGHT - PADDING.bottom} y2={HEIGHT - PADDING.bottom} stroke={chartPalette.border} />
+        <ValueAxis ticks={ticks} scale={scale} mode={mode} hiddenLabelIndexes={hiddenAxisLabelIndexes} />
         {mode === 'rsi'
           ? referenceLines.map((value) => (
               <line
@@ -112,7 +130,7 @@ export function IndicatorPanel({
                 x2={WIDTH - PADDING.right}
                 y1={scale(value)}
                 y2={scale(value)}
-                stroke="#999999"
+                stroke={chartPalette.textMuted}
                 strokeWidth="1"
               />
             ))
@@ -123,20 +141,20 @@ export function IndicatorPanel({
             x2={WIDTH - PADDING.right}
             y1={scale(0)}
             y2={scale(0)}
-            stroke="#bbbbbb"
+            stroke={chartPalette.borderStrong}
             strokeWidth="1"
           />
         ) : null}
         <polyline
           fill="none"
-          stroke="#cc725d"
+          stroke={chartPalette.chartOrange}
           strokeWidth="2"
           points={primary.map((point, index) => `${xFor(index, primary.length)},${scale(point.value)}`).join(' ')}
         />
         {secondary.length > 0 ? (
           <polyline
             fill="none"
-            stroke="#77a6bd"
+            stroke={chartPalette.chartBlue}
             strokeWidth="2"
             points={secondary.map((point, index) => `${xFor(index, secondary.length)},${scale(point.value)}`).join(' ')}
           />
@@ -154,10 +172,10 @@ export function IndicatorPanel({
           ) : null;
         })}
         {latest ? (
-          <g transform={`translate(${WIDTH - PADDING.right + 12} ${clamp(scale(latest.value) - 18, PADDING.top, HEIGHT - PADDING.bottom - VALUE_MARKER_HEIGHT)})`}>
-            <path d="M0 18 L12 0 H78 A5 5 0 0 1 83 5 V31 A5 5 0 0 1 78 36 H12 Z" fill="#ff5b2e" />
-            <text x="22" y="23" fill="#fff" fontSize="16" fontWeight="800">
-              {formatIndicatorValue(latest.value, mode)}
+          <g transform={`translate(${latestMarkerX} ${latestMarkerY})`}>
+            <path d={`M0 18 L12 0 H${latestMarkerWidth - 5} A5 5 0 0 1 ${latestMarkerWidth} 5 V31 A5 5 0 0 1 ${latestMarkerWidth - 5} 36 H12 Z`} fill={chartPalette.chartOrange} />
+            <text x="18" y="23" fill={chartPalette.surface} fontSize="14" fontWeight="600">
+              {latestValueText}
             </text>
           </g>
         ) : null}
@@ -194,29 +212,33 @@ export function IndicatorPanel({
 
 function SignalMarker({ x, y, signal }: { x: number; y: number; signal: 'buy' | 'sell' | string }) {
   const isBuy = signal === 'buy';
-  const color = isBuy ? '#ef4055' : '#4f7ee8';
+  const color = isBuy ? chartPalette.up : chartPalette.down;
   const points = isBuy
     ? `${x},${y - 10} ${x - 7},${y + 4} ${x + 7},${y + 4}`
     : `${x},${y + 10} ${x - 7},${y - 4} ${x + 7},${y - 4}`;
 
-  return <polygon points={points} fill={color} stroke="#ffffff" strokeWidth="1.5" />;
+  return <polygon points={points} fill={color} stroke={chartPalette.surface} strokeWidth="1.5" />;
 }
 
 function ValueAxis({
   ticks,
   scale,
   mode,
+  hiddenLabelIndexes,
 }: {
   ticks: number[];
   scale: (value: number) => number;
   mode: 'rsi' | 'macd';
+  hiddenLabelIndexes: number[];
 }) {
   return (
     <g aria-hidden="true">
-      {ticks.map((tick) => (
-        <text key={tick} x={WIDTH - PADDING.right + 16} y={scale(tick) + 4} className="axis-label indicator-axis-label">
-          {mode === 'rsi' ? tick.toFixed(0) : formatIndicatorValue(tick, mode)}
-        </text>
+      {ticks.map((tick, index) => (
+        hiddenLabelIndexes.includes(index) ? null : (
+          <text key={tick} x={WIDTH - PADDING.right + 16} y={scale(tick) + 4} className="axis-label indicator-axis-label">
+            {mode === 'rsi' ? tick.toFixed(0) : formatIndicatorValue(tick, mode)}
+          </text>
+        )
       ))}
     </g>
   );
@@ -245,18 +267,18 @@ function IndicatorTooltip({
   const tooltipY = clamp(y - tooltipHeight / 2, PADDING.top, HEIGHT - PADDING.bottom - tooltipHeight);
   return (
     <g className="chart-tooltip">
-      <line x1={x} x2={x} y1={PADDING.top} y2={HEIGHT - PADDING.bottom} stroke="#1f2937" strokeWidth="1" strokeDasharray="3 3" />
-      <circle cx={x} cy={y} r="4" fill="#111827" stroke="#ffffff" strokeWidth="2" />
+      <line x1={x} x2={x} y1={PADDING.top} y2={HEIGHT - PADDING.bottom} stroke={chartPalette.textPrimary} strokeWidth="1" strokeDasharray="3 3" />
+      <circle cx={x} cy={y} r="4" fill={chartPalette.textPrimary} stroke={chartPalette.surface} strokeWidth="2" />
       <g transform={`translate(${tooltipX} ${tooltipY})`}>
-        <rect width={tooltipWidth} height={tooltipHeight} rx="6" fill="#111827" opacity="0.94" />
-        <text x="10" y="20" fill="#ffffff" fontSize="13" fontWeight="800">
+        <rect width={tooltipWidth} height={tooltipHeight} rx="6" fill={chartPalette.textPrimary} opacity="0.96" />
+        <text x="10" y="20" fill={chartPalette.surface} fontSize="13" fontWeight="600">
           {formatDateLabel(primary.date)}
         </text>
-        <text x="10" y="42" fill="#d1d5db" fontSize="12">
+        <text x="10" y="42" fill={chartPalette.surfaceMuted} fontSize="12">
           {title} {formatIndicatorValue(primary.value, mode)}
         </text>
         {secondary ? (
-          <text x="10" y="62" fill="#d1d5db" fontSize="12">
+          <text x="10" y="62" fill={chartPalette.surfaceMuted} fontSize="12">
             {secondaryTitle} {formatIndicatorValue(secondary.value, mode)}
           </text>
         ) : null}

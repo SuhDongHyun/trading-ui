@@ -17,6 +17,7 @@ import {
   shouldClearTooltipOnPointerLeave,
 } from '../chartTooltipInteraction';
 import { formatCompact, formatDateLabel, formatNumber, formatSignedNumber } from '../format';
+import { chartPalette } from '../chartPalette';
 import { FearGreedGauge } from './FearGreedGauge';
 
 type MarketSummaryPageProps = {
@@ -141,13 +142,13 @@ export function MarketSummaryPage({
               xAxisDates={sharedDateAxisDates}
               getValue={(point) => point.value}
               formatValue={(value) => value.toFixed(2)}
-              color="#1f9aa8"
+              color={chartPalette.chartTeal}
             />
             <MarketCandlestickChart title="VKOSPI" points={data.vkospi} xAxisDates={sharedDateAxisDates} formatValue={(value) => value.toFixed(2)} />
             <Sp500CandlestickChart points={data.sp500} xAxisDates={sharedDateAxisDates} />
             <MarketCandlestickChart title="USD/KRW" points={data.usdKrwExchangeRate} xAxisDates={sharedDateAxisDates} formatValue={formatNumber} />
-            <MarketIndexVolumeChart title="KOSPI" points={data.kospi} xAxisDates={sharedDateAxisDates} color="#d9284c" />
-            <MarketIndexVolumeChart title="KOSDAQ" points={data.kosdaq} xAxisDates={sharedDateAxisDates} color="#3574d4" />
+            <MarketIndexVolumeChart title="KOSPI" points={data.kospi} xAxisDates={sharedDateAxisDates} color={chartPalette.up} />
+            <MarketIndexVolumeChart title="KOSDAQ" points={data.kosdaq} xAxisDates={sharedDateAxisDates} color={chartPalette.down} />
             <TreasuryYieldChart
               korea={data.korea10YearTreasuryYield}
               us={data.us10YearTreasuryYield}
@@ -386,7 +387,7 @@ function MarketIndexVolumeChart({
               y={y}
               width={barWidth}
               height={chartBottom - y}
-              fill="#e3ad28"
+              fill={chartPalette.chartGold}
               opacity="0.36"
               rx="2"
             />
@@ -428,9 +429,9 @@ function MarketIndexVolumeChart({
             date={hoveredPoint.date}
             rows={[
               { label: '종가', value: formatNumber(hoveredPoint.closePrice), color },
-              { label: '등락', value: formatMarketIndexChange(hoveredPoint), color: getPriceChangeTone(hoveredPoint.priceDiffRate) === 'up' ? '#d9284c' : '#3574d4' },
-              { label: '거래량', value: formatCompact(hoveredPoint.volume), color: '#7b8088' },
-              { label: '거래대금', value: formatCompact(hoveredPoint.tradingValue), color: '#c58b24' },
+              { label: '등락', value: formatMarketIndexChange(hoveredPoint), color: getPriceChangeTone(hoveredPoint.priceDiffRate) === 'up' ? chartPalette.up : chartPalette.down },
+              { label: '거래량', value: formatCompact(hoveredPoint.volume), color: chartPalette.textMuted },
+              { label: '거래대금', value: formatCompact(hoveredPoint.tradingValue), color: chartPalette.chartGold },
             ]}
             width={190}
             chartWidth={VOLUME_CHART_WIDTH}
@@ -507,7 +508,7 @@ function MarketCandlestickChart({
         {points.map((point, index) => {
           const x = xFor(index);
           const isUp = point.closePrice >= point.openPrice;
-          const color = isUp ? '#d9284c' : '#3574d4';
+          const color = isUp ? chartPalette.up : chartPalette.down;
           const bodyTop = scaleY(Math.max(point.openPrice, point.closePrice));
           const bodyBottom = scaleY(Math.min(point.openPrice, point.closePrice));
           const bodyHeight = Math.max(3, bodyBottom - bodyTop);
@@ -547,10 +548,10 @@ function MarketCandlestickChart({
             y={scaleY(hoveredPoint.closePrice)}
             date={hoveredPoint.date}
             rows={[
-              { label: '종가', value: formatValue(hoveredPoint.closePrice), color: '#16191e' },
-              { label: '시가', value: formatValue(hoveredPoint.openPrice), color: '#7b8088' },
-              { label: '고가', value: formatValue(hoveredPoint.highPrice), color: '#d9284c' },
-              { label: '저가', value: formatValue(hoveredPoint.lowPrice), color: '#3574d4' },
+              { label: '종가', value: formatValue(hoveredPoint.closePrice), color: chartPalette.textPrimary },
+              { label: '시가', value: formatValue(hoveredPoint.openPrice), color: chartPalette.textMuted },
+              { label: '고가', value: formatValue(hoveredPoint.highPrice), color: chartPalette.up },
+              { label: '저가', value: formatValue(hoveredPoint.lowPrice), color: chartPalette.down },
             ]}
             width={SUMMARY_TOOLTIP_WIDTH}
             chartWidth={CANDLE_WIDTH}
@@ -624,13 +625,13 @@ function TreasuryYieldChart({ korea, us }: { korea: TreasuryYieldPoint[]; us: Tr
         ))}
         <polyline
           fill="none"
-          stroke="#d9284c"
+          stroke={chartPalette.up}
           strokeWidth="2.8"
           points={korea.map((point, index) => `${xFor(index, korea.length)},${scaleY(point.yieldRate)}`).join(' ')}
         />
         <polyline
           fill="none"
-          stroke="#3574d4"
+          stroke={chartPalette.down}
           strokeWidth="2.8"
           points={us.map((point, index) => `${xFor(index, us.length)},${scaleY(point.yieldRate)}`).join(' ')}
         />
@@ -663,8 +664,8 @@ function TreasuryYieldChart({ korea, us }: { korea: TreasuryYieldPoint[]; us: Tr
             y={tooltipY}
             date={hoveredDate}
             rows={[
-              ...(hoveredKorea ? [{ label: '한국 10년', value: `${hoveredKorea.yieldRate.toFixed(2)}%`, color: '#d9284c' }] : []),
-              ...(hoveredUs ? [{ label: '미국 10년', value: `${hoveredUs.yieldRate.toFixed(2)}%`, color: '#3574d4' }] : []),
+              ...(hoveredKorea ? [{ label: '한국 10년', value: `${hoveredKorea.yieldRate.toFixed(2)}%`, color: chartPalette.up }] : []),
+              ...(hoveredUs ? [{ label: '미국 10년', value: `${hoveredUs.yieldRate.toFixed(2)}%`, color: chartPalette.down }] : []),
             ]}
             width={SUMMARY_TOOLTIP_WIDTH}
             chartWidth={LINE_WIDTH}
@@ -731,7 +732,7 @@ function Sp500CandlestickChart({ points, xAxisDates }: { points: Sp500IndexPoint
         {points.map((point, index) => {
           const x = xFor(index);
           const isUp = point.closePrice >= point.openPrice;
-          const color = isUp ? '#ef4055' : '#4f7ee8';
+          const color = isUp ? chartPalette.up : chartPalette.down;
           const bodyTop = scaleY(Math.max(point.openPrice, point.closePrice));
           const bodyBottom = scaleY(Math.min(point.openPrice, point.closePrice));
           const bodyHeight = Math.max(3, bodyBottom - bodyTop);
@@ -771,10 +772,10 @@ function Sp500CandlestickChart({ points, xAxisDates }: { points: Sp500IndexPoint
             y={scaleY(hoveredPoint.closePrice)}
             date={hoveredPoint.date}
             rows={[
-              { label: '종가', value: formatNumber(hoveredPoint.closePrice), color: '#16191e' },
-              { label: '시가', value: formatNumber(hoveredPoint.openPrice), color: '#7b8088' },
-              { label: '고가', value: formatNumber(hoveredPoint.highPrice), color: '#ef4055' },
-              { label: '저가', value: formatNumber(hoveredPoint.lowPrice), color: '#4f7ee8' },
+              { label: '종가', value: formatNumber(hoveredPoint.closePrice), color: chartPalette.textPrimary },
+              { label: '시가', value: formatNumber(hoveredPoint.openPrice), color: chartPalette.textMuted },
+              { label: '고가', value: formatNumber(hoveredPoint.highPrice), color: chartPalette.up },
+              { label: '저가', value: formatNumber(hoveredPoint.lowPrice), color: chartPalette.down },
             ]}
             width={SUMMARY_TOOLTIP_WIDTH}
             chartWidth={CANDLE_WIDTH}
@@ -825,10 +826,10 @@ function SummaryValueTooltip({
 
   return (
     <g className="summary-chart-tooltip" pointerEvents="none">
-      <line x1={x} x2={x} y1="0" y2={chartHeight} stroke="#111827" strokeDasharray="4 4" opacity="0.26" />
+      <line x1={x} x2={x} y1="0" y2={chartHeight} stroke={chartPalette.textPrimary} strokeDasharray="4 4" opacity="0.26" />
       <g transform={`translate(${tooltipX} ${tooltipY})`}>
-        <rect width={scaledWidth} height={scaledHeight} rx={6 * visualScale} fill="#111827" opacity="0.94" />
-        <text x={inset} y={18 * visualScale} fill="#d1d5db" fontSize={12 * visualScale} fontWeight="800">
+        <rect width={scaledWidth} height={scaledHeight} rx={6 * visualScale} fill={chartPalette.textPrimary} opacity="0.96" />
+        <text x={inset} y={18 * visualScale} fill={chartPalette.surfaceMuted} fontSize={12 * visualScale} fontWeight="600">
           {formatDateLabel(date)}
         </text>
         {rows.map((row, index) => (
@@ -836,9 +837,9 @@ function SummaryValueTooltip({
             key={`${row.label}-${index}`}
             x={inset}
             y={38 * visualScale + index * rowHeight}
-            fill="#fff"
+            fill={chartPalette.surface}
             fontSize={13 * visualScale}
-            fontWeight="850"
+            fontWeight="600"
           >
             <tspan fill={row.color}>●</tspan>
             <tspan dx={6 * visualScale}>{row.label}</tspan>
@@ -863,11 +864,11 @@ function SummaryGrid({
     <g aria-hidden="true">
       {[0, 1, 2, 3, 4].map((line) => {
         const y = padding.top + (line / 4) * (height - padding.top - padding.bottom);
-        return <line key={`h-${line}`} x1="0" x2={width} y1={y} y2={y} stroke="#eeeeee" strokeWidth="1" />;
+        return <line key={`h-${line}`} x1="0" x2={width} y1={y} y2={y} stroke={chartPalette.border} strokeWidth="1" />;
       })}
       {[0, 1, 2, 3].map((line) => {
         const x = padding.left + (line / 3) * (width - padding.left - padding.right);
-        return <line key={`v-${line}`} x1={x} x2={x} y1="0" y2={height} stroke="#f0f0f0" strokeWidth="1" />;
+        return <line key={`v-${line}`} x1={x} x2={x} y1="0" y2={height} stroke={chartPalette.surfaceMuted} strokeWidth="1" />;
       })}
     </g>
   );
