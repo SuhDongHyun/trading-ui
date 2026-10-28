@@ -11,6 +11,7 @@ import {
   formatBitcoinTradeTime,
   formatBitcoinVolume,
 } from '../bitcoinFormat';
+import { BitcoinDetailTabs } from './BitcoinDetailTabs';
 import type { useBitcoinSearch } from '../hooks/useBitcoinSearch';
 
 type BitcoinSearchPageProps = ReturnType<typeof useBitcoinSearch>;
@@ -168,7 +169,30 @@ export function BitcoinSearchPage(props: BitcoinSearchPageProps) {
 
       <div className="coin-detail">
         {selectedCoin ? (
-          <BitcoinQuoteHeader coin={selectedCoin} ticker={selectedTicker} isLoading={isDetailLoading} error={detailError} />
+          <>
+            <BitcoinQuoteHeader coin={selectedCoin} ticker={selectedTicker} isLoading={isDetailLoading} error={detailError} />
+            <BitcoinDetailTabs
+              coin={selectedCoin}
+              ticker={selectedTicker?.market === selectedCoin.market ? selectedTicker : selectedCoin}
+              detailTab={props.detailTab}
+              selectDetailTab={props.selectDetailTab}
+              chartPeriod={props.chartPeriod}
+              updateChartPeriod={props.updateChartPeriod}
+              candles={props.chartData?.market === selectedCoin.market && props.chartData.period === props.chartPeriod ? props.chartData.candles : null}
+              isChartLoading={props.isChartLoading}
+              chartError={props.chartError}
+              orderbookLevel={props.orderbookLevel}
+              updateOrderbookLevel={props.updateOrderbookLevel}
+              orderbook={props.orderbookData?.market === selectedCoin.market ? props.orderbookData : null}
+              isOrderbookLoading={props.isOrderbookLoading}
+              orderbookError={props.orderbookError}
+              tradeSide={props.tradeSide}
+              updateTradeSide={props.updateTradeSide}
+              trades={props.tradesData?.market === selectedCoin.market ? props.tradesData.trades : null}
+              isTradesLoading={props.isTradesLoading}
+              tradesError={props.tradesError}
+            />
+          </>
         ) : (
           <div className="coin-detail-state" role={error ? 'alert' : 'status'}>
             {error ? '코인 시세를 표시할 수 없습니다.' : '표시할 코인이 없습니다.'}
