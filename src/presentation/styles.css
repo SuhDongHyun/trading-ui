@@ -483,6 +483,9 @@ button:disabled {
   fill: var(--color-text-secondary);
   font-size: 16px;
   font-weight: var(--weight-semibold);
+  stroke: var(--color-surface);
+  stroke-width: 4px;
+  stroke-linejoin: round;
 }
 
 .gauge-edge-label {
@@ -1006,6 +1009,16 @@ button:disabled {
 .summary-line-chart .summary-date-label,
 .summary-candle-chart .summary-date-label {
   font-size: 14px;
+}
+
+@media (min-width: 821px) {
+  .summary-chart-card.wide-chart-card .summary-line-chart .summary-axis-label {
+    font-size: 7px;
+  }
+
+  .summary-chart-card.wide-chart-card .summary-line-chart .summary-date-label {
+    font-size: 6px;
+  }
 }
 
 .news-panel {

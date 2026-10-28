@@ -1,22 +1,23 @@
 import type { FearAndGreedIndex } from '../../domain/stock';
+import { chartPalette } from '../chartPalette';
 
 type FearGreedGaugeProps = {
   index?: FearAndGreedIndex | null;
 };
 
-const WIDTH = 320;
-const HEIGHT = 190;
-const CENTER_X = 160;
-const CENTER_Y = 150;
-const RADIUS = 118;
+const WIDTH = 450;
+const HEIGHT = 260;
+const CENTER_X = 225;
+const CENTER_Y = 200;
+const RADIUS = 165;
 const STROKE_WIDTH = 18;
 
 const SEGMENTS = [
-  { from: 0, to: 20, label: 'Extreme Fear', color: '#d43d3d' },
-  { from: 20, to: 40, label: 'Fear', color: '#e27b36' },
-  { from: 40, to: 60, label: 'Neutral', color: '#d5b33f' },
-  { from: 60, to: 80, label: 'Greed', color: '#7fb95b' },
-  { from: 80, to: 100, label: 'Extreme Greed', color: '#2c9a5b' },
+  { from: 0, to: 20, label: 'Extreme Fear', color: chartPalette.fearExtreme, labelX: 0, labelY: 194, textAnchor: 'start' as const },
+  { from: 20, to: 40, label: 'Fear', color: chartPalette.fear, labelX: 94, labelY: 75, textAnchor: 'end' as const },
+  { from: 40, to: 60, label: 'Neutral', color: chartPalette.neutral, labelX: CENTER_X, labelY: 13, textAnchor: 'middle' as const },
+  { from: 60, to: 80, label: 'Greed', color: chartPalette.greed, labelX: 356, labelY: 75, textAnchor: 'start' as const },
+  { from: 80, to: 100, label: 'Extreme Greed', color: chartPalette.greedExtreme, labelX: WIDTH, labelY: 194, textAnchor: 'end' as const },
 ];
 
 export function FearGreedGauge({ index }: FearGreedGaugeProps) {
@@ -45,15 +46,15 @@ export function FearGreedGauge({ index }: FearGreedGaugeProps) {
           y1={CENTER_Y}
           x2={pointer.x}
           y2={pointer.y}
-          stroke="#111827"
+          stroke={chartPalette.textPrimary}
           strokeWidth="5"
           strokeLinecap="round"
         />
-        <circle cx={CENTER_X} cy={CENTER_Y} r="8" fill="#111827" />
-        <text x={CENTER_X} y="105" className="gauge-value" textAnchor="middle">
+        <circle cx={CENTER_X} cy={CENTER_Y} r="8" fill={chartPalette.textPrimary} />
+        <text x={CENTER_X} y={CENTER_Y - 45} className="gauge-value" textAnchor="middle">
           {index ? value.toFixed(0) : '-'}
         </text>
-        <text x={CENTER_X} y="128" className="gauge-condition" textAnchor="middle">
+        <text x={CENTER_X} y={CENTER_Y - 22} className="gauge-condition" textAnchor="middle" paintOrder="stroke">
           {condition}
         </text>
       </svg>
@@ -62,14 +63,12 @@ export function FearGreedGauge({ index }: FearGreedGaugeProps) {
 }
 
 function GaugeLabel({ segment }: { segment: (typeof SEGMENTS)[number] }) {
-  const midpoint = (segment.from + segment.to) / 2;
-  const point = polarToCartesian(CENTER_X, CENTER_Y, RADIUS - 38, valueToAngle(midpoint));
   const words = segment.label.split(' ');
 
   return (
-    <text x={point.x} y={point.y} className="gauge-edge-label" textAnchor="middle">
+    <text x={segment.labelX} y={segment.labelY} className="gauge-edge-label" textAnchor={segment.textAnchor}>
       {words.map((word, index) => (
-        <tspan key={word} x={point.x} dy={index === 0 ? 0 : 14}>
+        <tspan key={word} x={segment.labelX} dy={index === 0 ? 0 : 14}>
           {word}
         </tspan>
       ))}
