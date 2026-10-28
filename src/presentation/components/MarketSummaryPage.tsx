@@ -93,7 +93,7 @@ export function MarketSummaryPage({
           <button type="submit" disabled={isLoading}>
             {isLoading ? '조회 중' : '조회'}
           </button>
-          <button type="button" onClick={onRefresh} disabled={isLoading}>
+          <button type="button" className="secondary-button" onClick={onRefresh} disabled={isLoading}>
             새로고침
           </button>
         </form>
