@@ -45,6 +45,8 @@ cp .env.example .env
 API_PROXY_TARGET=https://trading-api-gold.vercel.app
 ```
 
+Vercel 배포에서는 `middleware.ts`가 `/api` 요청을 `API_PROXY_TARGET`으로 프록시합니다. `.env`는 Vercel에 올라가지 않으므로 Vercel 프로젝트의 Environment Variables에 같은 이름으로 `API_PROXY_TARGET`을 등록해야 합니다. 값이 없으면 `/api` 요청은 500으로 응답합니다.
+
 필요한 백엔드 endpoint:
 
 - `POST /stock_quote`
@@ -109,6 +111,7 @@ src/
 tests/
   loadStockChart.test.ts
   stock.test.ts
+middleware.ts
 vite.config.ts
 ```
 
