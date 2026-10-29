@@ -1,4 +1,4 @@
-import type { IndicatorSettings, Period, StockChartData } from '../../domain/stock';
+import type { IndicatorSettings, StockChartData } from '../../domain/stock';
 import { PriceChart } from './PriceChart';
 import { IndicatorPanel } from './IndicatorPanel';
 
@@ -6,28 +6,13 @@ type ChartShellProps = {
   data: StockChartData | null;
   isLoading: boolean;
   settings: IndicatorSettings;
-  period: Period;
   onOpenSettings: () => void;
 };
 
-const PERIOD_LABELS: Array<{ value: Period; label: string }> = [
-  { value: 'D', label: '일' },
-  { value: 'W', label: '주' },
-  { value: 'M', label: '월' },
-  { value: 'Y', label: '년' },
-];
-
-export function ChartShell({ data, isLoading, settings, period, onOpenSettings }: ChartShellProps) {
+export function ChartShell({ data, isLoading, settings, onOpenSettings }: ChartShellProps) {
   return (
     <section className="chart-shell" aria-label="차트">
       <div className="chart-toolbar">
-        <div className="period-control" aria-label="기간">
-          {PERIOD_LABELS.map((item) => (
-            <span key={item.value} className={item.value === period ? 'active' : undefined}>
-              {item.label}
-            </span>
-          ))}
-        </div>
         <div className="tool-icons" aria-label="차트 도구">
           <button type="button" aria-label="설정" onClick={onOpenSettings}>
             ⚙

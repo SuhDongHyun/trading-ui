@@ -1,4 +1,3 @@
-export type Period = 'D' | 'W' | 'M' | 'Y';
 export type Market = 'J' | 'NX' | 'UN';
 
 export type StockQuery = {
@@ -6,7 +5,6 @@ export type StockQuery = {
   code: string;
   startDate: string;
   endDate: string;
-  period: Period;
   adjustedPrice: boolean;
 };
 
@@ -241,7 +239,6 @@ export function createDefaultQuery(today = new Date()): StockQuery {
     code: '',
     startDate: formatDateInput(start),
     endDate,
-    period: 'D',
     adjustedPrice: true,
   };
 }

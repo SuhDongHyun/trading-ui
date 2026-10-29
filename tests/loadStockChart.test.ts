@@ -64,7 +64,6 @@ test('loadStockChart uses the selected market for candle prices and moving avera
     code: '005930',
     startDate: '2026-04-07',
     endDate: '2026-05-16',
-    period: 'D',
     adjustedPrice: true,
   };
   const settings: IndicatorSettings = {
@@ -141,7 +140,6 @@ test('loadStockChart includes MACD signal data using the selected MACD and signa
     code: '005930',
     startDate: '2026-04-07',
     endDate: '2026-05-16',
-    period: 'D',
     adjustedPrice: true,
   };
   const settings: IndicatorSettings = {
@@ -222,7 +220,6 @@ test('loadStockChart includes news for the selected code and end date', async ()
     code: '005930',
     startDate: '2026-04-07',
     endDate: '2026-05-16',
-    period: 'D',
     adjustedPrice: true,
   };
   const settings: IndicatorSettings = {
@@ -307,7 +304,6 @@ test('loadStockChart does not load market summary indicators', async () => {
     code: '005930',
     startDate: '2026-04-07',
     endDate: '2026-05-16',
-    period: 'D',
     adjustedPrice: true,
   };
   const settings: IndicatorSettings = {

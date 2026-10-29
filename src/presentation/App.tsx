@@ -111,7 +111,6 @@ export function App() {
                 data={data}
                 isLoading={isLoading}
                 settings={settings}
-                period={query.period}
                 onOpenSettings={() => setSettingsOpen(true)}
               />
             ) : null}
