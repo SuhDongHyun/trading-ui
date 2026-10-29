@@ -1,5 +1,5 @@
 import { useMemo, useState, type FormEvent, type FocusEvent } from 'react';
-import type { Market, Period, StockMetaInfo, StockQuery } from '../../domain/stock';
+import type { Market, StockMetaInfo, StockQuery } from '../../domain/stock';
 import { filterStockOptions, resolveStockSearchSelection } from '../stockSearch';
 
 type QueryBarProps = {
@@ -108,18 +108,6 @@ export function QueryBar({ query, stockInput, stockOptions, isStockListLoading, 
           value={draft.endDate}
           onChange={(event) => setDraft({ ...draft, endDate: event.target.value })}
         />
-      </label>
-      <label>
-        주기
-        <select
-          value={draft.period}
-          onChange={(event) => setDraft({ ...draft, period: event.target.value as Period })}
-        >
-          <option value="D">일</option>
-          <option value="W">주</option>
-          <option value="M">월</option>
-          <option value="Y">년</option>
-        </select>
       </label>
       <label className="check-label">
         <input
